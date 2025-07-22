@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quoridor 3D - Custom Models</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="stars" id="stars-container"></div>
+        <canvas id="c"></canvas>
+        <div id="ui-container">
+            <button id="language-toggle">🌐 עברית</button>
+            
+            <!-- Game Mode Selection -->
+            <div id="game-mode-selection" style="display: none;">
+                <div id="header" class="ui-panel">
+                    <h1>Quoridor 3D</h1>
+                    <p id="game-description">Reach the other side of the board before your opponent!</p>
+                </div>
+                
+                <div class="ui-panel" style="text-align: center;">
+                    <h2 id="game-mode-title">Game Mode</h2>
+                    <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1rem;">
+                        <button class="control-btn" onclick="selectGameMode('pvp')">
+                            <span>👥</span><span class="btn-text" id="pvp-btn-text">Player vs Player</span>
+                        </button>
+                        <button class="control-btn" onclick="selectGameMode('pvc')">
+                            <span>🤖</span><span class="btn-text" id="pvc-btn-text">Player vs AI</span>
+                        </button>
+                    </div>
+                    
+                    <div id="difficulty-selection" style="display: none;">
+                        <h3 id="difficulty-title">AI Difficulty</h3>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button class="control-btn" onclick="selectDifficulty('easy')">
+                                <span>😊</span><span class="btn-text" id="easy-btn-text">Easy</span>
+                            </button>
+                            <button class="control-btn" onclick="selectDifficulty('medium')">
+                                <span>🤔</span><span class="btn-text" id="medium-btn-text">Medium</span>
+                            </button>
+                            <button class="control-btn" onclick="selectDifficulty('hard')">
+                                <span>😤</span><span class="btn-text" id="hard-btn-text">Hard</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Game UI -->
+            <div id="main-ui" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                <div id="header" class="ui-panel">
+                    <h1>Quoridor 3D</h1>
+                    <p id="game-description">Reach the other side of the board before your opponent!</p>
+                </div>
+
+                <div id="winner-message"></div>
+
+                <div id="controls-status-wrapper">
+                    <div id="status-panel" class="ui-panel">
+                        <div class="players">
+                            <div id="p1-status" class="player-info" style="color: #2563eb;">Player 1: 10 walls</div>
+                            <div id="p2-status" class="player-info" style="color: #dc2626;">Player 2: 10 walls</div>
+                        </div>
+                        <div id="turn-indicator"><span class="loading-spinner"></span> Loading models...</div>
+                        <div id="action-prompt"></div>
+                    </div>
+                    <div id="controls-panel" class="ui-panel">
+                        <button id="move-btn" class="control-btn active"><span>🚶</span><span class="btn-text">Move</span></button>
+                        <button id="wall-btn" class="control-btn"><span>🧱</span><span class="btn-text">Place Wall</span></button>
+                        <button id="reset-btn" class="control-btn"><span>🔄</span><span class="btn-text">New Game</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script src="js/globals.js"></script>
+    <script src="js/language.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/ui.js"></script>
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>
