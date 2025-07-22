@@ -80,6 +80,10 @@ class MobileControls {
         const touch = event.changedTouches[0];
         this.touchEndPos = { x: touch.clientX, y: touch.clientY };
         
+        // Check if touch was on a UI button
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const isUIButton = element && (element.closest('.control-btn') || element.closest('button'));
+        
         // Check if this was a tap (not a drag)
         const distance = Math.sqrt(
             Math.pow(this.touchEndPos.x - this.touchStartPos.x, 2) +
@@ -87,13 +91,19 @@ class MobileControls {
         );
         
         if (distance < 10) { // It's a tap, not a drag
-            this.handleTap(touch);
+            if (isUIButton) {
+                // For UI buttons, let the normal event handling work
+                // Don't prevent default to allow normal click events
+                console.log('Touch on UI button, allowing normal click handling');
+            } else {
+                this.handleTap(touch);
+            }
         }
         
         this.isTouch = false;
         
-        // Prevent default to avoid mouse events firing
-        if (this.isGameAreaTouch(touch)) {
+        // Only prevent default for game area touches, not UI buttons
+        if (this.isGameAreaTouch(touch) && !isUIButton) {
             event.preventDefault();
         }
     }
@@ -112,17 +122,17 @@ class MobileControls {
     }
 
     handleSingleTap(touch) {
-        // Simulate click event for the game logic
-        const clickEvent = new MouseEvent('click', {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            bubbles: true
-        });
-        
         // Check if tap was on UI element
         const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (element && element.closest('.control-btn')) {
-            // Let the normal click handler deal with it
+        if (element && (element.closest('.control-btn') || element.closest('.ui-panel'))) {
+            // For UI elements, trigger a proper click event
+            const clickEvent = new MouseEvent('click', {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                bubbles: true,
+                cancelable: true
+            });
+            element.dispatchEvent(clickEvent);
             return;
         }
         
@@ -133,7 +143,13 @@ class MobileControls {
                 return; // AI turn, ignore taps
             }
             
-            // Trigger the game's click handler
+            // Trigger the game's click handler for canvas
+            const clickEvent = new MouseEvent('click', {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                bubbles: true,
+                cancelable: true
+            });
             document.dispatchEvent(clickEvent);
         }
     }

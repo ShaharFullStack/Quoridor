@@ -517,6 +517,27 @@ canvas {
     min-width: 120px;
 }
 
+/* Difficulty selection visibility */
+#difficulty-selection {
+    margin-top: 1rem !important;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#difficulty-selection h3 {
+    margin-bottom: 1rem;
+}
+
 @media (max-width: 480px) {
     #game-mode-selection div[style*="flex"] {
         flex-direction: column;
@@ -526,6 +547,15 @@ canvas {
     #game-mode-selection .control-btn {
         min-width: auto;
         width: 100%;
+    }
+    
+    #difficulty-selection {
+        margin-top: 0.75rem !important;
+    }
+    
+    #difficulty-selection h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
     }
 }
 

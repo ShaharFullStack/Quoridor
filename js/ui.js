@@ -198,10 +198,25 @@ function hideGameModeSelection() {
 }
 
 function selectGameMode(mode) {
+    console.log('selectGameMode called with:', mode); // Debug log
     window.gameMode = mode;
     if (mode === 'pvc') {
-        document.getElementById('difficulty-selection').style.display = 'block';
+        const difficultySelection = document.getElementById('difficulty-selection');
+        console.log('Found difficulty-selection element:', difficultySelection); // Debug log
+        if (difficultySelection) {
+            difficultySelection.style.display = 'block';
+            difficultySelection.style.visibility = 'visible';
+            difficultySelection.style.opacity = '1';
+            console.log('Set difficulty-selection to visible'); // Debug log
+        } else {
+            console.error('difficulty-selection element not found!');
+        }
     } else {
+        // Hide difficulty selection for PvP mode
+        const difficultySelection = document.getElementById('difficulty-selection');
+        if (difficultySelection) {
+            difficultySelection.style.display = 'none';
+        }
         startNewGame();
     }
 }
@@ -288,6 +303,110 @@ function startNewGame() {
         setTimeout(showMobileHelp, 1000);
     }
 }
+
+// Setup event listeners for game mode selection
+function setupGameModeEventListeners() {
+    // Wait for DOM to be ready
+    const checkAndSetup = () => {
+        console.log('Setting up game mode event listeners...');
+        
+        // Use more specific selectors and add both click and touch events
+        const pvpBtn = document.querySelector('button[onclick*="pvp"]');
+        const pvcBtn = document.querySelector('button[onclick*="pvc"]');
+        
+        if (pvpBtn && pvcBtn) {
+            console.log('Found PVP and PVC buttons, setting up listeners');
+            
+            // Keep onclick as fallback, but also add event listeners
+            pvpBtn.addEventListener('click', (e) => {
+                console.log('PVP button clicked');
+                selectGameMode('pvp');
+            });
+            
+            pvcBtn.addEventListener('click', (e) => {
+                console.log('PVC button clicked');
+                selectGameMode('pvc');
+            });
+            
+            // Also add touch events for mobile
+            pvpBtn.addEventListener('touchend', (e) => {
+                console.log('PVP button touched');
+                e.preventDefault();
+                selectGameMode('pvp');
+            });
+            
+            pvcBtn.addEventListener('touchend', (e) => {
+                console.log('PVC button touched');
+                e.preventDefault();
+                selectGameMode('pvc');
+            });
+        }
+        
+        // Setup difficulty buttons
+        const setupDifficultyButtons = () => {
+            const easyBtn = document.querySelector('button[onclick*="easy"]');
+            const mediumBtn = document.querySelector('button[onclick*="medium"]');
+            const hardBtn = document.querySelector('button[onclick*="hard"]');
+            
+            if (easyBtn && mediumBtn && hardBtn) {
+                console.log('Found difficulty buttons, setting up listeners');
+                
+                easyBtn.addEventListener('click', (e) => {
+                    console.log('Easy button clicked');
+                    selectDifficulty('easy');
+                });
+                
+                mediumBtn.addEventListener('click', (e) => {
+                    console.log('Medium button clicked');
+                    selectDifficulty('medium');
+                });
+                
+                hardBtn.addEventListener('click', (e) => {
+                    console.log('Hard button clicked');
+                    selectDifficulty('hard');
+                });
+                
+                // Touch events for mobile
+                easyBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    selectDifficulty('easy');
+                });
+                
+                mediumBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    selectDifficulty('medium');
+                });
+                
+                hardBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    selectDifficulty('hard');
+                });
+            }
+        };
+        
+        // Setup difficulty buttons initially and after difficulty panel shows
+        setupDifficultyButtons();
+        
+        // Also setup difficulty buttons when they become visible
+        const observer = new MutationObserver(() => {
+            setupDifficultyButtons();
+        });
+        
+        const difficultyPanel = document.getElementById('difficulty-selection');
+        if (difficultyPanel) {
+            observer.observe(difficultyPanel, { childList: true, subtree: true, attributes: true });
+        }
+    };
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkAndSetup);
+    } else {
+        setTimeout(checkAndSetup, 100); // Small delay to ensure DOM is fully ready
+    }
+}
+
+// Initialize event listeners
+setupGameModeEventListeners();
 
 // Export functions for global access
 window.updateUI = updateUI;
