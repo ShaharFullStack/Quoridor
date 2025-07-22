@@ -31,6 +31,7 @@ const translations = {
         gameModeTitle: 'Game Mode',
         difficultyTitle: 'AI Difficulty',
         startGameBtn: 'Start Game',
+        mobileHelp: 'Tap to move • Double-tap to switch modes',
         languageToggle: '🌐 עברית'
     },
     he: {
@@ -62,6 +63,7 @@ const translations = {
         gameModeTitle: 'מצב משחק',
         difficultyTitle: 'רמת קושי',
         startGameBtn: 'התחל משחק',
+        mobileHelp: 'הקש כדי לזוז • הקש פעמיים להחלפת מצבים',
         languageToggle: '🌐 English'
     }
 };
@@ -99,6 +101,12 @@ function updateAllText() {
     // Update main game button texts
     document.querySelector('#move-btn .btn-text').textContent = t('moveBtn');
     document.querySelector('#reset-btn .btn-text').textContent = t('newGameBtn');
+    
+    // Update mobile help text
+    const mobileHelp = document.getElementById('mobile-help');
+    if (mobileHelp) {
+        mobileHelp.textContent = t('mobileHelp');
+    }
     
     if (typeof updateUI === 'function') {
         updateUI(); // Refresh all dynamic text

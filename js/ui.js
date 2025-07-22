@@ -256,6 +256,39 @@ function checkAiTurn() {
     }
 }
 
+// Mobile help functionality
+function showMobileHelp() {
+    const mobileHelp = document.getElementById('mobile-help');
+    if (mobileHelp && MobileControls.isMobileDevice()) {
+        mobileHelp.textContent = t('mobileHelp');
+        mobileHelp.classList.add('show');
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            mobileHelp.classList.remove('show');
+        }, 3000);
+    }
+}
+
+function hideMobileHelp() {
+    const mobileHelp = document.getElementById('mobile-help');
+    if (mobileHelp) {
+        mobileHelp.classList.remove('show');
+    }
+}
+
+// Show mobile help when game starts
+function startNewGame() {
+    hideGameModeSelection();
+    document.getElementById('difficulty-selection').style.display = 'none';
+    resetGame();
+    
+    // Show mobile help for first-time users
+    if (MobileControls.isMobileDevice()) {
+        setTimeout(showMobileHelp, 1000);
+    }
+}
+
 // Export functions for global access
 window.updateUI = updateUI;
 window.updateScene = updateScene;
@@ -265,3 +298,5 @@ window.showGameModeSelection = showGameModeSelection;
 window.selectGameMode = selectGameMode;
 window.selectDifficulty = selectDifficulty;
 window.checkAiTurn = checkAiTurn;
+window.showMobileHelp = showMobileHelp;
+window.hideMobileHelp = hideMobileHelp;

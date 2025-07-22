@@ -396,9 +396,23 @@ function initScene3D() {
     window.controls = new OrbitControls(window.camera, window.renderer.domElement);
     window.controls.target.set(0, 2, 0); // Look slightly above board center
     window.controls.maxPolarAngle = Math.PI / 2 - 0.05; // Allow slightly lower angle
-    window.controls.minDistance = 12;
-    window.controls.maxDistance = 35;
+    window.controls.minDistance = 10;
+    window.controls.maxDistance = 40;
     window.controls.enableDamping = true;
+    window.controls.dampingFactor = 0.05;
+    
+    // Mobile-specific optimizations
+    if (MobileControls.isMobileDevice()) {
+        window.controls.enablePan = false; // Disable panning on mobile to prevent conflicts
+        window.controls.rotateSpeed = 0.5; // Slower rotation for better control
+        window.controls.zoomSpeed = 0.8; // Slower zoom for better control
+        window.controls.minDistance = 8; // Allow closer zoom on mobile
+        window.controls.maxDistance = 30; // Reduce max distance on mobile
+        
+        // Adjust damping for smoother mobile experience
+        window.controls.enableDamping = true;
+        window.controls.dampingFactor = 0.1;
+    }
 
     // Enhanced lighting system - improved quality
     const mainLight = new THREE.DirectionalLight(0xffffff, 2);
