@@ -103,10 +103,20 @@ window.checkWinner = checkWinner;
 function isWallBetween(pos1, pos2) {
     if (pos1.row === pos2.row) { // Horizontal move
         const wallCol = Math.min(pos1.col, pos2.col);
-        return window.gameState.verticalWalls.has(`${pos1.row}-${wallCol}`);
+        const wallKey = `${pos1.row}-${wallCol}`;
+        const blocked = window.gameState.verticalWalls.has(wallKey);
+        if (blocked) {
+            console.log(`Horizontal move blocked: (${pos1.row},${pos1.col}) -> (${pos2.row},${pos2.col}) by vertical wall ${wallKey}`);
+        }
+        return blocked;
     } else { // Vertical move
         const wallRow = Math.min(pos1.row, pos2.row);
-        return window.gameState.horizontalWalls.has(`${wallRow}-${pos1.col}`);
+        const wallKey = `${wallRow}-${pos1.col}`;
+        const blocked = window.gameState.horizontalWalls.has(wallKey);
+        if (blocked) {
+            console.log(`Vertical move blocked: (${pos1.row},${pos1.col}) -> (${pos2.row},${pos2.col}) by horizontal wall ${wallKey}`);
+        }
+        return blocked;
     }
 }
 window.isWallBetween = isWallBetween;
@@ -304,9 +314,16 @@ function handleWallClick(wallType, row, col) {
 
 function placeWall(seg1, seg2) {
     const wallSet = seg1.wallType === 'horizontal' ? window.gameState.horizontalWalls : window.gameState.verticalWalls;
-    wallSet.add(`${seg1.row}-${seg1.col}`);
-    wallSet.add(`${seg2.row}-${seg2.col}`);
+    const seg1Key = `${seg1.row}-${seg1.col}`;
+    const seg2Key = `${seg2.row}-${seg2.col}`;
+    
+    wallSet.add(seg1Key);
+    wallSet.add(seg2Key);
     window.gameState.wallsRemaining[window.gameState.currentPlayer]--;
+    
+    // Debug wall placement
+    console.log(`Placed ${seg1.wallType} wall: ${seg1Key}, ${seg2Key}`);
+    console.log(`Current ${seg1.wallType} walls:`, Array.from(wallSet));
     
     // Create wall mesh based on the actual segments positions
     const minRow = Math.min(seg1.row, seg2.row);

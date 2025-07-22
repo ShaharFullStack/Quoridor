@@ -5,6 +5,7 @@ class MobileControls {
         this.isMobile = this.detectMobile();
         this.touchStartPos = { x: 0, y: 0 };
         this.touchEndPos = { x: 0, y: 0 };
+        this.lastTouchPos = { x: 0, y: 0 };
         this.isTouch = false;
         this.lastTapTime = 0;
         this.doubleTapDelay = 300;
@@ -62,6 +63,9 @@ class MobileControls {
         
         const touch = event.touches[0];
         
+        // Store the latest touch position for accurate end handling
+        this.lastTouchPos = { x: touch.clientX, y: touch.clientY };
+        
         // Update mouse position for three.js raycaster
         if (window.mouse) {
             window.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
@@ -80,8 +84,11 @@ class MobileControls {
         const touch = event.changedTouches[0];
         this.touchEndPos = { x: touch.clientX, y: touch.clientY };
         
+        // Use the most accurate touch position (from touchmove if available)
+        const finalTouch = this.lastTouchPos.x !== 0 ? this.lastTouchPos : this.touchEndPos;
+        
         // Check if touch was on a UI button
-        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const element = document.elementFromPoint(finalTouch.x, finalTouch.y);
         const isUIButton = element && (element.closest('.control-btn') || element.closest('button'));
         
         // Check if this was a tap (not a drag)
@@ -90,17 +97,22 @@ class MobileControls {
             Math.pow(this.touchEndPos.y - this.touchStartPos.y, 2)
         );
         
-        if (distance < 10) { // It's a tap, not a drag
+        if (distance < 20) { // It's a tap, not a drag (increased threshold for mobile)
             if (isUIButton) {
                 // For UI buttons, let the normal event handling work
                 // Don't prevent default to allow normal click events
-                console.log('Touch on UI button, allowing normal click handling');
             } else {
-                this.handleTap(touch);
+                // Create a synthetic touch object with the most accurate coordinates
+                const accurateTouch = {
+                    clientX: finalTouch.x,
+                    clientY: finalTouch.y
+                };
+                this.handleTap(accurateTouch);
             }
         }
         
         this.isTouch = false;
+        this.lastTouchPos = { x: 0, y: 0 }; // Reset for next touch
         
         // Only prevent default for game area touches, not UI buttons
         if (this.isGameAreaTouch(touch) && !isUIButton) {
@@ -141,6 +153,12 @@ class MobileControls {
             // Only process if it's player's turn
             if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) {
                 return; // AI turn, ignore taps
+            }
+            
+            // Update mouse coordinates for accurate raycasting
+            if (window.mouse) {
+                window.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                window.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
             }
             
             // Trigger the game's click handler for canvas
