@@ -149,54 +149,73 @@ function calculateValidMoves() {
 window.calculateValidMoves = calculateValidMoves;
 
 function hasPathToGoal(playerPos, targetRow, tempWalls) {
+    // Input validation
+    if (!playerPos || typeof targetRow !== 'number' || !tempWalls) return false;
+    
+    // If already at target row, path exists
+    if (playerPos.row === targetRow) return true;
+    
     const queue = [playerPos];
     const visited = new Set([`${playerPos.row}-${playerPos.col}`]);
     
     while (queue.length > 0) {
         const current = queue.shift();
+        
+        // Check if we've reached the target row
         if (current.row === targetRow) return true;
         
+        // Explore all four directions
         const directions = [{r: -1, c: 0}, {r: 1, c: 0}, {r: 0, c: -1}, {r: 0, c: 1}];
         for (const dir of directions) {
             const next = { row: current.row + dir.r, col: current.col + dir.c };
+            
+            // Check bounds
             if (next.row < 0 || next.row >= window.BOARD_SIZE || next.col < 0 || next.col >= window.BOARD_SIZE) continue;
             
             const posKey = `${next.row}-${next.col}`;
             if (visited.has(posKey)) continue;
 
+            // Check if move is blocked by a wall
             let blocked = false;
-            if (next.row !== current.row) { // Vertical move
+            if (next.row !== current.row) { // Vertical move (up/down)
                 const wallRow = Math.min(current.row, next.row);
-                blocked = tempWalls.horizontal.has(`${wallRow}-${current.col}`);
-            } else { // Horizontal move
+                blocked = tempWalls.horizontal && tempWalls.horizontal.has(`${wallRow}-${current.col}`);
+            } else { // Horizontal move (left/right)
                 const wallCol = Math.min(current.col, next.col);
-                blocked = tempWalls.vertical.has(`${current.row}-${wallCol}`);
+                blocked = tempWalls.vertical && tempWalls.vertical.has(`${current.row}-${wallCol}`);
             }
             
+            // If not blocked, add to queue for exploration
             if (!blocked) {
                 visited.add(posKey);
                 queue.push(next);
             }
         }
     }
+    
+    // No path found to target row
     return false;
 }
 
 function isValidWallPlacement(first, second) {
+    // Check if player has walls remaining
     if (window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0) return false;
     
     const firstKey = `${first.row}-${first.col}`;
     const secondKey = `${second.row}-${second.col}`;
     
+    // Check if wall segments are already occupied
     const wallSet = first.wallType === 'horizontal' ? window.gameState.horizontalWalls : window.gameState.verticalWalls;
     if (wallSet.has(firstKey) || wallSet.has(secondKey)) return false;
 
+    // Check for wall intersections (walls cannot cross each other)
     if (first.wallType === 'horizontal') {
         if (window.gameState.verticalWalls.has(`${first.row}-${first.col}`)) return false;
     } else { // vertical
         if (window.gameState.horizontalWalls.has(`${first.row}-${first.col}`)) return false;
     }
 
+    // Create temporary wall configuration to test paths
     const tempH_Walls = new Set(window.gameState.horizontalWalls);
     const tempV_Walls = new Set(window.gameState.verticalWalls);
     
@@ -209,8 +228,17 @@ function isValidWallPlacement(first, second) {
     }
     
     const tempWalls = { horizontal: tempH_Walls, vertical: tempV_Walls };
-    return hasPathToGoal(window.gameState.player1Position, 0, tempWalls) &&
-           hasPathToGoal(window.gameState.player2Position, 8, tempWalls);
+    
+    // CRITICAL RULE: Both players must always have a path to their goal
+    const player1HasPath = hasPathToGoal(window.gameState.player1Position, 0, tempWalls);
+    const player2HasPath = hasPathToGoal(window.gameState.player2Position, 8, tempWalls);
+    
+    // Path validation ensures game rules are enforced
+    if (!player1HasPath || !player2HasPath) {
+        return false; // Wall placement would violate Quoridor rules
+    }
+    
+    return player1HasPath && player2HasPath;
 }
 window.isValidWallPlacement = isValidWallPlacement;
 

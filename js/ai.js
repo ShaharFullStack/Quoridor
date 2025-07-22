@@ -339,15 +339,8 @@ class QuoridorAI {
                 const posKey = `${next.row}-${next.col}`;
                 if (visited.has(posKey)) continue;
                 
-                // Check if move is blocked by wall
-                let blocked = false;
-                if (next.row !== pos.row) { // Vertical move
-                    const wallRow = Math.min(pos.row, next.row);
-                    blocked = walls.horizontal.has(`${wallRow}-${pos.col}`);
-                } else { // Horizontal move
-                    const wallCol = Math.min(pos.col, next.col);
-                    blocked = walls.vertical.has(`${pos.row}-${wallCol}`);
-                }
+                // Use the same wall-checking logic as the main game
+                let blocked = this.isWallBetweenPositions(pos, next, walls);
                 
                 if (!blocked) {
                     visited.add(posKey);
@@ -357,6 +350,17 @@ class QuoridorAI {
         }
         
         return -1; // No path found
+    }
+
+    // Helper method that mirrors the main game's isWallBetween function
+    isWallBetweenPositions(pos1, pos2, walls) {
+        if (pos1.row === pos2.row) { // Horizontal move
+            const wallCol = Math.min(pos1.col, pos2.col);
+            return walls.vertical.has(`${pos1.row}-${wallCol}`);
+        } else { // Vertical move
+            const wallRow = Math.min(pos1.row, pos2.row);
+            return walls.horizontal.has(`${wallRow}-${pos1.col}`);
+        }
     }
 
     executePlayerMove(row, col) {
