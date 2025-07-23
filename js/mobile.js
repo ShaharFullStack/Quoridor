@@ -134,10 +134,9 @@ class MobileControls {
     }
 
     handleSingleTap(touch) {
-        // Check if tap was on UI element
+        // Always trigger a click event at the tap location, just like desktop
         const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (element && (element.closest('.control-btn') || element.closest('.ui-panel'))) {
-            // For UI elements, trigger a proper click event
+        if (element) {
             const clickEvent = new MouseEvent('click', {
                 clientX: touch.clientX,
                 clientY: touch.clientY,
@@ -145,30 +144,6 @@ class MobileControls {
                 cancelable: true
             });
             element.dispatchEvent(clickEvent);
-            return;
-        }
-        
-        // Handle game board tap
-        if (this.isGameAreaTouch(touch) && window.gameState && !window.gameState.winner) {
-            // Only process if it's player's turn
-            if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) {
-                return; // AI turn, ignore taps
-            }
-            
-            // Update mouse coordinates for accurate raycasting
-            if (window.mouse) {
-                window.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-                window.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-            }
-            
-            // Trigger the game's click handler for canvas
-            const clickEvent = new MouseEvent('click', {
-                clientX: touch.clientX,
-                clientY: touch.clientY,
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(clickEvent);
         }
     }
 
