@@ -1,6 +1,68 @@
 // --- SCENE & UI UPDATING ---
+
+// Animation system for smooth player movement
+window.playerAnimations = {
+    player1: { isAnimating: false, startPos: null, endPos: null, progress: 0, duration: 0.8 },
+    player2: { isAnimating: false, startPos: null, endPos: null, progress: 0, duration: 0.8 }
+};
+
+function animatePlayerMovement(playerNum, fromPos, toPos, callback) {
+    const animKey = `player${playerNum}`;
+    const anim = window.playerAnimations[animKey];
+    
+    // Set up animation
+    anim.isAnimating = true;
+    anim.startPos = posToCoords(fromPos);
+    anim.endPos = posToCoords(toPos);
+    anim.progress = 0;
+    
+    const animationLoop = () => {
+        anim.progress += 0.08; // Animation speed
+        
+        if (anim.progress >= 1) {
+            anim.progress = 1;
+            anim.isAnimating = false;
+            if (callback) callback();
+        }
+        
+        // Smooth easing function (ease-out)
+        const easeProgress = 1 - Math.pow(1 - anim.progress, 3);
+        
+        // Interpolate position
+        const currentX = anim.startPos.x + (anim.endPos.x - anim.startPos.x) * easeProgress;
+        const currentZ = anim.startPos.z + (anim.endPos.z - anim.startPos.z) * easeProgress;
+        
+        // Add slight arc to the movement (jump effect)
+        const arcHeight = Math.sin(anim.progress * Math.PI) * 0.8;
+        const playerHeight = CUBE_HEIGHT + 1.5 + arcHeight;
+        
+        // Update pawn position
+        if (window.pawns[playerNum]) {
+            window.pawns[playerNum].position.set(currentX, playerHeight, currentZ);
+            
+            // Update spotlight to follow
+            if (window.playerSpotlights[playerNum]) {
+                const offsetX = playerNum === 1 ? 2 : -2;
+                const offsetZ = playerNum === 1 ? 4 : -4;
+                window.playerSpotlights[playerNum].position.set(currentX + offsetX, 15, currentZ + offsetZ);
+                window.playerSpotlights[playerNum].target.position.set(currentX, playerHeight, currentZ);
+            }
+        }
+        
+        if (anim.isAnimating) {
+            requestAnimationFrame(animationLoop);
+        }
+    };
+    
+    animationLoop();
+}
+
+// Make the animation function globally available
+window.animatePlayerMovement = animatePlayerMovement;
+
 function updateScene() {
-    if(window.pawns[1]) {
+    // Only update positions if not animating
+    if(window.pawns[1] && !window.playerAnimations.player1.isAnimating) {
         const pos1 = posToCoords(gameState.player1Position);
         const playerHeight = CUBE_HEIGHT + 1.5;
         window.pawns[1].position.set(pos1.x, playerHeight, pos1.z);
@@ -10,7 +72,7 @@ function updateScene() {
             window.playerSpotlights[1].target.position.set(pos1.x, playerHeight, pos1.z);
         }
     }
-    if(window.pawns[2]) {
+    if(window.pawns[2] && !window.playerAnimations.player2.isAnimating) {
         const pos2 = posToCoords(gameState.player2Position);
         const playerHeight = CUBE_HEIGHT + 1.5;
         window.pawns[2].position.set(pos2.x, playerHeight, pos2.z);
@@ -110,16 +172,19 @@ function updateUI() {
     p2Status.style.textDecoration = window.gameState.currentPlayer === 2 ? 'underline' : 'none';
 
     const winnerMsg = document.getElementById('winner-message');
+    const winnerText = winnerMsg ? winnerMsg.querySelector('.winner-text') : null;
     if (window.gameState.winner) {
         // Handle different winner messages based on game mode
-        if (window.gameMode === 'pvc') {
-            if (window.gameState.winner === 1) {
-                winnerMsg.textContent = t('playerWinner');
+        if (winnerText) {
+            if (window.gameMode === 'pvc') {
+                if (window.gameState.winner === 1) {
+                    winnerText.textContent = t('playerWinner');
+                } else {
+                    winnerText.textContent = t('aiWinner');
+                }
             } else {
-                winnerMsg.textContent = t('aiWinner');
+                winnerText.textContent = t('winner', window.gameState.winner);
             }
-        } else {
-            winnerMsg.textContent = t('winner', window.gameState.winner);
         }
         winnerMsg.classList.add('show');
         document.getElementById('turn-indicator').style.display = 'none';
@@ -128,7 +193,6 @@ function updateUI() {
         winnerMsg.classList.remove('show');
         document.getElementById('turn-indicator').style.display = 'block';
         document.getElementById('action-prompt').style.display = 'block';
-        
         // Update turn indicator based on game mode
         if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) {
             if (window.isAiThinking) {
@@ -139,10 +203,9 @@ function updateUI() {
         } else {
             document.getElementById('turn-indicator').textContent = t('playerTurn', window.gameState.currentPlayer);
         }
-        
         let promptText = '';
         if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2 && !window.isAiThinking) {
-            promptText = ''; // Don't show prompts during AI turn
+            promptText = '';
         } else if (window.gameState.gameMode === 'move') {
             promptText = t('chooseMove');
         } else {
@@ -154,6 +217,31 @@ function updateUI() {
         }
         document.getElementById('action-prompt').textContent = promptText;
     }
+// Winner overlay button handlers
+function setupWinnerOverlayButtons() {
+    const menuBtn = document.getElementById('winner-menu-btn');
+    const replayBtn = document.getElementById('winner-replay-btn');
+    if (menuBtn) {
+        menuBtn.onclick = () => {
+            // Hide winner overlay and show main menu
+            document.getElementById('winner-message').classList.remove('show');
+            showGameModeSelection();
+        };
+    }
+    if (replayBtn) {
+        replayBtn.onclick = () => {
+            document.getElementById('winner-message').classList.remove('show');
+            startNewGame();
+        };
+    }
+}
+
+// Setup winner overlay buttons on DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupWinnerOverlayButtons);
+} else {
+    setupWinnerOverlayButtons();
+}
 
     // Disable controls during AI turn
     const isAiTurn = window.gameMode === 'pvc' && window.gameState.currentPlayer === 2;
@@ -272,36 +360,6 @@ function startNewGame() {
     resetGame();
 }
 
-// Create animated star background
-function createStarField() {
-    const starsContainer = document.getElementById('stars-container');
-    const numberOfStars = 100;
-    
-    for (let i = 0; i < numberOfStars; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 2 + 's';
-        star.style.animationDuration = (Math.random() * 3 + 1) + 's';
-        starsContainer.appendChild(star);
-    }
-    
-    // Add floating particles
-    const numberOfParticles = 20;
-    for (let i = 0; i < numberOfParticles; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 4 + 2;
-        particle.style.width = size + 'px';
-        particle.style.height = size + 'px';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 6 + 's';
-        particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-        starsContainer.appendChild(particle);
-    }
-}
 
 // Add event listener for AI moves
 function checkAiTurn() {
@@ -445,7 +503,48 @@ function setupGameModeEventListeners() {
 }
 
 // Initialize event listeners
+
 setupGameModeEventListeners();
+
+// --- MOBILE: Add touch support for in-game action buttons and menu toggle ---
+function setupInGameMobileTouchEvents() {
+    // Main action buttons
+    const moveBtn = document.getElementById('move-btn');
+    const wallBtn = document.getElementById('wall-btn');
+    const langBtn = document.getElementById('main-language-toggle');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    if (moveBtn) {
+        moveBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!moveBtn.disabled) setGameMode('move');
+        });
+    }
+    if (wallBtn) {
+        wallBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (!wallBtn.disabled) setGameMode('wall');
+        });
+    }
+    if (langBtn) {
+        langBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            langBtn.click();
+        });
+    }
+    if (menuToggle) {
+        menuToggle.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupInGameMobileTouchEvents);
+} else {
+    setTimeout(setupInGameMobileTouchEvents, 100);
+}
 
 // Menu toggle functionality
 function toggleMenu() {
@@ -465,7 +564,6 @@ function toggleMenu() {
 window.updateUI = updateUI;
 window.updateScene = updateScene;
 window.setGameMode = setGameMode;
-window.createStarField = createStarField;
 window.showGameModeSelection = showGameModeSelection;
 window.selectGameMode = selectGameMode;
 window.selectDifficulty = selectDifficulty;

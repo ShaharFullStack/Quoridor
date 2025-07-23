@@ -9,7 +9,6 @@
 <body>
 
     <div id="game-container">
-        <div class="stars" id="stars-container"></div>
         <canvas id="c"></canvas>
         <!-- Starting Screen Overlay -->
         <div id="start-screen" class="start-screen">
@@ -112,7 +111,7 @@
                     <h3>Game Controls</h3>
                     <div class="game-controls">
                         <button id="reset-btn" class="menu-btn">
-                            <span>🔄</span> <span class="btn-text">New Game</span>
+                            <span></span> <span class="btn-text">New Game</span>
                         </button>
                     </div>
                 </div>
@@ -131,15 +130,24 @@
                 <div class="menu-section">
                     <h3>How to Play</h3>
                     <div class="game-info">
-                        <p>🎯 <strong>Goal:</strong> Reach the opposite side of the board</p>
-                        <p>🚶 <strong>Move:</strong> Click on highlighted squares to move your piece</p>
-                        <p>🧱 <strong>Walls:</strong> Place walls to block your opponent's path</p>
-                        <p>⚡ <strong>Tip:</strong> You can jump over your opponent!</p>
+                        <p> <strong>Goal:</strong> Reach the opposite side of the board</p>
+                        <p> <strong>Move:</strong> Click on highlighted squares to move your piece</p>
+                        <p> <strong>Walls:</strong> Place walls to block your opponent's path</p>
+                        <p> <strong>Tip:</strong> You can jump over your opponent!</p>
                     </div>
                 </div>
             </div>
             
-            <div id="winner-message" class="winner-overlay"></div>
+        </div>
+        <div id="winner-message" class="winner-overlay">
+            <div class="winner-content">
+                <div class="winner-text"></div>
+                <div class="winner-actions">
+                    <button id="winner-menu-btn" class="winner-btn">🏠 Main Menu</button>
+                    <button id="winner-replay-btn" class="winner-btn">🔄 Play Again</button>
+                </div>
+            </div>
+        </div>
         </div>
         
         <!-- Mobile Help Text -->

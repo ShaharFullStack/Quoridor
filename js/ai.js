@@ -364,8 +364,17 @@ class QuoridorAI {
     }
 
     executePlayerMove(row, col) {
+        // Store the previous position for animation
+        const fromPos = { ...gameState.player2Position };
+        const toPos = { row, col };
+        
+        // Update game state immediately
         gameState.player2Position = { row, col };
-        endTurn();
+        
+        // Animate the movement, then end turn when animation completes
+        animatePlayerMovement(2, fromPos, toPos, () => {
+            endTurn();
+        });
     }
 
     executeWallPlacement(seg1, seg2) {
