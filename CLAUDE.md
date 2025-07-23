@@ -404,7 +404,18 @@ Changed wall geometry from `CELL_SIZE * 2` to `CELL_SIZE` to fix 50-100-50 issue
 - User picks segments 1,2 but wall appears only on cube 2
 - Collision blocking affects wrong segments (2,3 instead of 1,2)
 
-**STATUS**: FAILED - Wall positioning and collision logic both broken.
+**STATUS**: PARTIAL SUCCESS - User accepted current solution
+
+## Current State (User Accepted)
+- Wall appears in correct place (no more offset issue)
+- Wall placement now only requires 1 step instead of 2 steps
+- User notes this is "not ideal" but acceptable for now
+
+**What was changed**: Reverted to original positioning code with `minRow, minCol` instead of center coordinates.
+
+**Remaining issues**: 
+- Single-step placement instead of intended 2-step placement
+- User would prefer 2-step placement but can live with current solution
 
 ## Previous failed attempts log
 ```
