@@ -188,15 +188,15 @@ function updateAllText() {
     // Update game info section
     const gameInfoPs = document.querySelectorAll('.game-info p');
     if (gameInfoPs.length > 0 && currentLanguage === 'he') {
-        gameInfoPs[0].innerHTML = '🎯 <strong>מטרה:</strong> הגע לצד הנגדי של הלוח';
-        gameInfoPs[1].innerHTML = '🚶 <strong>תנועה:</strong> לחץ על המרבעים המסומנים כדי להזיז את הכלי';
-        gameInfoPs[2].innerHTML = '🧱 <strong>חומות:</strong> הצב חומות כדי לחסום את נתיב היריב';
-        gameInfoPs[3].innerHTML = '⚡ <strong>טיפ:</strong> אתה יכול לקפוץ מעל היריב!';
+        gameInfoPs[0].innerHTML = ' <strong>מטרה:</strong> הגע לצד הנגדי של הלוח';
+        gameInfoPs[1].innerHTML = ' <strong>תנועה:</strong> לחץ על המרבעים המסומנים כדי להזיז את הכלי';
+        gameInfoPs[2].innerHTML = ' <strong>חומות:</strong> הצב חומות כדי לחסום את נתיב היריב';
+        gameInfoPs[3].innerHTML = ' <strong>טיפ:</strong> אתה יכול לקפוץ מעל היריב!';
     } else if (gameInfoPs.length > 0) {
-        gameInfoPs[0].innerHTML = '🎯 <strong>Goal:</strong> Reach the opposite side of the board';
-        gameInfoPs[1].innerHTML = '🚶 <strong>Move:</strong> Click on highlighted squares to move your piece';
-        gameInfoPs[2].innerHTML = '🧱 <strong>Walls:</strong> Place walls to block your opponent\'s path';
-        gameInfoPs[3].innerHTML = '⚡ <strong>Tip:</strong> You can jump over your opponent!';
+        gameInfoPs[0].innerHTML = ' <strong>Goal:</strong> Reach the opposite side of the board';
+        gameInfoPs[1].innerHTML = ' <strong>Move:</strong> Click on highlighted squares to move your piece';
+        gameInfoPs[2].innerHTML = ' <strong>Walls:</strong> Place walls to block your opponent\'s path';
+        gameInfoPs[3].innerHTML = ' <strong>Tip:</strong> You can jump over your opponent!';
     }
     
     // Update mobile help text

@@ -387,12 +387,48 @@ class MobileControls {
 }
 
 // Initialize mobile controls when DOM is ready
+
+function setupMobileButtonTouchEvents() {
+    // Winner overlay buttons
+    const winnerMenuBtn = document.getElementById('winner-menu-btn');
+    const winnerReplayBtn = document.getElementById('winner-replay-btn');
+    if (winnerMenuBtn) {
+        winnerMenuBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            winnerMenuBtn.click();
+        });
+    }
+    if (winnerReplayBtn) {
+        winnerReplayBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            winnerReplayBtn.click();
+        });
+    }
+    // Menu buttons (reset, language, etc)
+    const resetBtn = document.getElementById('reset-btn');
+    const langBtn = document.getElementById('language-toggle');
+    if (resetBtn) {
+        resetBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            resetBtn.click();
+        });
+    }
+    if (langBtn) {
+        langBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            langBtn.click();
+        });
+    }
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.mobileControls = new MobileControls();
+        setTimeout(setupMobileButtonTouchEvents, 100);
     });
 } else {
     window.mobileControls = new MobileControls();
+    setTimeout(setupMobileButtonTouchEvents, 100);
 }
 
 // Export for global access

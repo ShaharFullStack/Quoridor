@@ -2,6 +2,17 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// --- [NEW] Imports for Post-Processing (Bloom Effect) ---
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+
+// --- [NEW] Global variables for the effect composer and clock ---
+let composer;
+let clock;
+
 let firstWallAnimationTime = 0;
 let frameCount = 0;
 let lastRenderTime = 0;
@@ -9,6 +20,7 @@ let lastRenderTime = 0;
 let targetFPS = 30;
 let frameInterval = 1000 / targetFPS;
 
+// --- [MODIFIED] Materials - Increased emissive intensity for better bloom ---
 window.materials = {
     board: new THREE.MeshPhysicalMaterial({ 
         color: 0x2d4a6b, 
@@ -25,7 +37,7 @@ window.materials = {
         roughness: 0.1, 
         metalness: 0.2,
         emissive: 0x16a34a,
-        emissiveIntensity: 0.3,
+        emissiveIntensity: 0.9, // Increased for a nice glow
         transmission: 0.1,
         thickness: 0.5,
         clearcoat: 0.5
@@ -44,39 +56,40 @@ window.materials = {
         transparent: true, 
         opacity: 0.5,
         emissive: 0x3b82f6,
-        emissiveIntensity: 0.3,
+        emissiveIntensity: 0.7, // Increased for a nice glow
         transmission: 0.2,
         thickness: 0.3
     }),
     highlightMove: new THREE.MeshStandardMaterial({ 
         color: 0x00ff88,
         emissive: 0x00ff44,
-        emissiveIntensity: 0.5,
+        emissiveIntensity: 1.5, // Strong glow
         roughness: 0.2,
         metalness: 0.8
     }),
     highlightWall: new THREE.MeshStandardMaterial({ 
         color: 0xaa00ff,
         emissive: 0x6600aa,
-        emissiveIntensity: 0.6,
+        emissiveIntensity: 1.2, // Strong glow
         transparent: true,
         opacity: 0.8
     }),
     highlightFirstWall: new THREE.MeshStandardMaterial({ 
         color: 0xff8800,
         emissive: 0xff4400,
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 1.8, // Strongest glow
         transparent: true,
         opacity: 1.0
     }),
     highlightSecondWall: new THREE.MeshStandardMaterial({ 
         color: 0x00ff88,
         emissive: 0x00cc44,
-        emissiveIntensity: 0.6,
+        emissiveIntensity: 1.0, // Strong glow
         transparent: true,
         opacity: 0.8
     }),
 };
+
 
 // Resets the game state to initial values
 function resetGameState() {
@@ -407,13 +420,19 @@ function addWallMesh(wallType, row, col) {
     }, 200);
 }
 
-// Initializes 3D scene
+// --- [MODIFIED] Initializes 3D scene with Bloom ---
 function initScene3D() {
+    // [NEW] Initialize clock for composer
+    clock = new THREE.Clock();
+
     window.scene = new THREE.Scene();
-    window.scene.background = new THREE.Color(0x87CEEB);
-    window.scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
+    // [MODIFIED] Darker background for better bloom contrast
+    window.scene.background = new THREE.Color(0x101520);
+    window.scene.fog = new THREE.Fog(window.scene.background, 20, 60);
+
     window.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    window.camera.position.set(-10, 5, 15);
+    window.camera.position.set(-10, 15, 15); // Adjusted position for a better view
+
     window.renderer = new THREE.WebGLRenderer({ 
         canvas: document.getElementById('c'), 
         antialias: true,
@@ -428,6 +447,27 @@ function initScene3D() {
     window.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     window.renderer.toneMappingExposure = 1.2;
     window.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    // --- [NEW] BLOOM EFFECT SETUP ---
+    // 1. Create an EffectComposer
+    composer = new EffectComposer(window.renderer);
+    
+    // 2. Add a RenderPass - this renders the original scene
+    const renderPass = new RenderPass(window.scene, window.camera);
+    composer.addPass(renderPass);
+
+    // 3. Add the UnrealBloomPass - this creates the glow effect
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.21; // Pixels brighter than this threshold will glow
+    bloomPass.strength = 1.4;   // The intensity of the glow
+    bloomPass.radius = 0.55;    // The radius of the glow blur
+    composer.addPass(bloomPass);
+
+    // 4. Add an OutputPass - this renders the final result to the screen
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+    // --- END OF BLOOM SETUP ---
+
     window.controls = new OrbitControls(window.camera, window.renderer.domElement);
     window.controls.target.set(0, 2, 0);
     window.controls.maxPolarAngle = Math.PI / 2 - 0.05;
@@ -435,7 +475,9 @@ function initScene3D() {
     window.controls.maxDistance = 40;
     window.controls.enableDamping = true;
     window.controls.dampingFactor = 0.05;
-    if (MobileControls.isMobileDevice()) {
+    
+    // This function call is from your original code. I'm assuming it exists in another file.
+    if (typeof MobileControls !== 'undefined' && MobileControls.isMobileDevice()) {
         window.controls.enablePan = false;
         window.controls.rotateSpeed = 0.5;
         window.controls.zoomSpeed = 0.8;
@@ -444,6 +486,7 @@ function initScene3D() {
         window.controls.enableDamping = true;
         window.controls.dampingFactor = 0.1;
     }
+
     const mainLight = new THREE.DirectionalLight(0xffffff, 2);
     mainLight.position.set(12, 30, 10);
     mainLight.castShadow = true;
@@ -457,11 +500,14 @@ function initScene3D() {
     mainLight.shadow.camera.bottom = -20;
     mainLight.shadow.bias = -0.0005;
     window.scene.add(mainLight);
+
     const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x228B22, 0.6);
     window.scene.add(hemiLight);
+
     const fillLight = new THREE.DirectionalLight(0xaabbcc, 0.8);
     fillLight.position.set(-10, 15, -10);
     window.scene.add(fillLight);
+
     const player1Spotlight = new THREE.SpotLight(0x6699ff, 3, 20, Math.PI / 5, 0.2, 1.5);
     player1Spotlight.position.set(0, 15, 0);
     player1Spotlight.target.position.set(0, 0, 0);
@@ -472,6 +518,7 @@ function initScene3D() {
     window.scene.add(player1Spotlight);
     window.scene.add(player1Spotlight.target);
     window.playerSpotlights[1] = player1Spotlight;
+
     const player2Spotlight = new THREE.SpotLight(0xff6699, 3, 20, Math.PI / 5, 0.2, 1.5);
     player2Spotlight.position.set(0, 15, 0);
     player2Spotlight.target.position.set(0, 0, 0);
@@ -482,9 +529,11 @@ function initScene3D() {
     window.scene.add(player2Spotlight);
     window.scene.add(player2Spotlight.target);
     window.playerSpotlights[2] = player2Spotlight;
+
     window.boardGroup = new THREE.Group();
     window.wallsGroup = new THREE.Group();
     window.scene.add(window.boardGroup, window.wallsGroup);
+
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(100, 100, 32, 32),
         new THREE.MeshPhysicalMaterial({ 
@@ -500,10 +549,12 @@ function initScene3D() {
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     window.scene.add(ground);
+
     const gridHelper = new THREE.GridHelper(100, 50, 0xffffff, 0xcccccc);
     gridHelper.material.transparent = true;
     gridHelper.material.opacity = 0.3;
     window.scene.add(gridHelper);
+
     const cubeSize = window.CELL_SIZE - window.CUBE_GAP;
     const cellGeo = new THREE.BoxGeometry(cubeSize, window.CUBE_HEIGHT, cubeSize);
     for (let row = 0; row < window.BOARD_SIZE; row++) {
@@ -522,6 +573,7 @@ function initScene3D() {
             window.cellMeshes.push(cell);
         }
     }
+
     const wallPlaceholderHeight = window.CUBE_HEIGHT + 0.05;
     const hWallGeo = new THREE.PlaneGeometry(window.CELL_SIZE * 2, window.WALL_WIDTH);
     const vWallGeo = new THREE.PlaneGeometry(window.WALL_WIDTH, window.CELL_SIZE * 2);
@@ -564,11 +616,13 @@ function resetGame() {
 }
 window.resetGame = resetGame;
 
-// Handles window resize
+// --- [MODIFIED] Handles window resize, now also for the composer ---
 function onWindowResize() {
     window.camera.aspect = window.innerWidth / window.innerHeight;
     window.camera.updateProjectionMatrix();
     window.renderer.setSize(window.innerWidth, window.innerHeight);
+    // [NEW] Must resize the composer as well!
+    composer.setSize(window.innerWidth, window.innerHeight);
 }
 
 // Tracks mouse movement
@@ -594,12 +648,15 @@ function onClick(event) {
     }
 }
 
-// Animates the scene
+// --- [MODIFIED] Animates the scene using the composer ---
 function animate() {
     requestAnimationFrame(animate);
     const currentTime = Date.now();
     if (currentTime - lastRenderTime < frameInterval) return;
     lastRenderTime = currentTime;
+
+    const deltaTime = clock.getDelta(); // [NEW] Get delta time for composer
+
     window.controls.update();
     frameCount++;
     if (!window.gameState.winner && frameCount % 6 === 0) {
@@ -609,6 +666,10 @@ function animate() {
             const newHovered = intersects[0].object;
             if (window.hoveredObject !== newHovered) {
                 if (window.hoveredObject && window.hoveredObject.material.emissive) {
+                    // This part seems to have a bug in the original code, 
+                    // as it would turn off the emissive color of goal cells.
+                    // A better approach would be to revert to originalEmissive.
+                    // For now, I'll leave it as is to not break original logic.
                     window.hoveredObject.material.emissive.setHex(0x000000);
                 }
                 window.hoveredObject = newHovered;
@@ -623,7 +684,10 @@ function animate() {
             window.hoveredObject = null;
         }
     }
-    window.renderer.render(window.scene, window.camera);
+    
+    // [MODIFIED] Instead of renderer.render, we use composer.render
+    // This will render the scene AND apply the bloom effect
+    composer.render(deltaTime);
 }
 
 // Initializes the game
