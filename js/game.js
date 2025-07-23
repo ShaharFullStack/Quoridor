@@ -435,11 +435,9 @@ function placeWall(seg1, seg2) {
     console.log(`   Segments: (${seg1.row},${seg1.col}) and (${seg2.row},${seg2.col})`);
     console.log(`   Min/Max: minRow=${minRow}, maxRow=${maxRow}, minCol=${minCol}, maxCol=${maxCol}`);
     
-    // Calculate the center position between the two segments
-    const centerRow = (minRow + maxRow) / 2;
-    const centerCol = (minCol + maxCol) / 2;
-    console.log(`   Wall center position: (${centerRow}, ${centerCol})`);
-    addWallMesh(seg1.wallType, centerRow, centerCol);
+    // Use minRow/minCol as the starting position for the wall
+    console.log(`   Wall position: (${minRow}, ${minCol})`);
+    addWallMesh(seg1.wallType, minRow, minCol);
 }
 window.placeWall = placeWall;
 
