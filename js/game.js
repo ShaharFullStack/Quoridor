@@ -101,23 +101,38 @@ function checkWinner() {
 window.checkWinner = checkWinner;
 
 function isWallBetween(pos1, pos2) {
-    if (pos1.row === pos2.row) { // Horizontal move
-        const wallCol = Math.min(pos1.col, pos2.col);
-        const wallKey = `${pos1.row}-${wallCol}`;
+    // Only block if the wall is directly between the two cells
+    if (pos1.row === pos2.row && Math.abs(pos1.col - pos2.col) === 1) { // Horizontal move (left/right)
+        const minCol = Math.min(pos1.col, pos2.col);
+        const row = pos1.row;
+        // Vertical wall at (row, minCol) blocks movement between (row, minCol) and (row, minCol+1)
+        const wallKey = `${row}-${minCol}`;
         const blocked = window.gameState.verticalWalls.has(wallKey);
         if (blocked) {
-            console.log(`Horizontal move blocked: (${pos1.row},${pos1.col}) -> (${pos2.row},${pos2.col}) by vertical wall ${wallKey}`);
+            console.log(`🚧 WALL BLOCKING: Horizontal move (${pos1.row},${pos1.col}) → (${pos2.row},${pos2.col}) blocked by vertical wall ${wallKey}`);
         }
         return blocked;
-    } else { // Vertical move
-        const wallRow = Math.min(pos1.row, pos2.row);
-        const wallKey = `${wallRow}-${pos1.col}`;
-        const blocked = window.gameState.horizontalWalls.has(wallKey);
-        if (blocked) {
-            console.log(`Vertical move blocked: (${pos1.row},${pos1.col}) -> (${pos2.row},${pos2.col}) by horizontal wall ${wallKey}`);
+    } else if (pos1.col === pos2.col && Math.abs(pos1.row - pos2.row) === 1) { // Vertical move (up/down)
+        // Only block if moving from (row, col) to (row+1, col) and there is a horizontal wall at (row, col)
+        // Or moving from (row+1, col) to (row, col) and there is a horizontal wall at (row, col)
+        let blocked = false;
+        if (pos1.row < pos2.row) {
+            // Moving down: check for wall at (pos1.row, pos1.col)
+            blocked = window.gameState.horizontalWalls.has(`${pos1.row}-${pos1.col}`);
+            if (blocked) {
+                console.log(`🚧 WALL BLOCKING: Vertical move (${pos1.row},${pos1.col}) → (${pos2.row},${pos2.col}) blocked by horizontal wall ${pos1.row}-${pos1.col}`);
+            }
+        } else {
+            // Moving up: check for wall at (pos2.row, pos2.col)
+            blocked = window.gameState.horizontalWalls.has(`${pos2.row}-${pos2.col}`);
+            if (blocked) {
+                console.log(`🚧 WALL BLOCKING: Vertical move (${pos1.row},${pos1.col}) → (${pos2.row},${pos2.col}) blocked by horizontal wall ${pos2.row}-${pos2.col}`);
+            }
         }
         return blocked;
     }
+    // For non-adjacent moves (like jumps), don't block
+    return false;
 }
 window.isWallBetween = isWallBetween;
 
@@ -125,6 +140,11 @@ function calculateValidMoves() {
     const moves = [];
     const pPos = window.gameState.currentPlayer === 1 ? window.gameState.player1Position : window.gameState.player2Position;
     const oPos = window.gameState.currentPlayer === 1 ? window.gameState.player2Position : window.gameState.player1Position;
+
+    // Debug move calculation start
+    console.log(`🔍 CALCULATING MOVES for Player ${window.gameState.currentPlayer}:`);
+    console.log(`   Player position: (${pPos.row},${pPos.col})`);
+    console.log(`   Opponent position: (${oPos.row},${oPos.col})`);
 
     const directions = [{r: -1, c: 0}, {r: 1, c: 0}, {r: 0, c: -1}, {r: 0, c: 1}];
     
@@ -139,22 +159,42 @@ function calculateValidMoves() {
             const jumpPos = { row: oPos.row + dir.r, col: oPos.col + dir.c };
             if (!isWallBetween(oPos, jumpPos) && jumpPos.row >=0 && jumpPos.row < window.BOARD_SIZE && jumpPos.col >= 0 && jumpPos.col < window.BOARD_SIZE) {
                 moves.push(jumpPos);
+                console.log(`   ↗️ Jump move added: (${jumpPos.row},${jumpPos.col})`);
             } else {
                 // Wall behind opponent, check diagonal moves
                 if (dir.r === 0) { // Horizontal move
-                    if (!isWallBetween(oPos, {row: oPos.row - 1, col: oPos.col})) moves.push({row: oPos.row - 1, col: oPos.col});
-                    if (!isWallBetween(oPos, {row: oPos.row + 1, col: oPos.col})) moves.push({row: oPos.row + 1, col: oPos.col});
+                    const diag1 = {row: oPos.row - 1, col: oPos.col};
+                    const diag2 = {row: oPos.row + 1, col: oPos.col};
+                    if (!isWallBetween(oPos, diag1) && diag1.row >= 0) {
+                        moves.push(diag1);
+                        console.log(`   ↗️ Diagonal move added: (${diag1.row},${diag1.col})`);
+                    }
+                    if (!isWallBetween(oPos, diag2) && diag2.row < window.BOARD_SIZE) {
+                        moves.push(diag2);
+                        console.log(`   ↗️ Diagonal move added: (${diag2.row},${diag2.col})`);
+                    }
                 } else { // Vertical move
-                    if (!isWallBetween(oPos, {row: oPos.row, col: oPos.col - 1})) moves.push({row: oPos.row, col: oPos.col - 1});
-                    if (!isWallBetween(oPos, {row: oPos.row, col: oPos.col + 1})) moves.push({row: oPos.row, col: oPos.col + 1});
+                    const diag1 = {row: oPos.row, col: oPos.col - 1};
+                    const diag2 = {row: oPos.row, col: oPos.col + 1};
+                    if (!isWallBetween(oPos, diag1) && diag1.col >= 0) {
+                        moves.push(diag1);
+                        console.log(`   ↗️ Diagonal move added: (${diag1.row},${diag1.col})`);
+                    }
+                    if (!isWallBetween(oPos, diag2) && diag2.col < window.BOARD_SIZE) {
+                        moves.push(diag2);
+                        console.log(`   ↗️ Diagonal move added: (${diag2.row},${diag2.col})`);
+                    }
                 }
             }
         } else {
             moves.push(nextPos);
+            console.log(`   ✅ Normal move added: (${nextPos.row},${nextPos.col})`);
         }
     }
     // Filter out out-of-bounds moves from diagonal jumps
     window.gameState.validMoves = moves.filter(m => m && m.row >= 0 && m.row < window.BOARD_SIZE && m.col >= 0 && m.col < window.BOARD_SIZE);
+    
+    console.log(`   Final valid moves: ${window.gameState.validMoves.length} moves -`, window.gameState.validMoves.map(m => `(${m.row},${m.col})`));
 }
 window.calculateValidMoves = calculateValidMoves;
 
@@ -185,14 +225,14 @@ function hasPathToGoal(playerPos, targetRow, tempWalls) {
             const posKey = `${next.row}-${next.col}`;
             if (visited.has(posKey)) continue;
 
-            // Check if move is blocked by a wall
+            // Check if move is blocked by a wall - use same logic as isWallBetween
             let blocked = false;
-            if (next.row !== current.row) { // Vertical move (up/down)
-                const wallRow = Math.min(current.row, next.row);
-                blocked = tempWalls.horizontal && tempWalls.horizontal.has(`${wallRow}-${current.col}`);
-            } else { // Horizontal move (left/right)
-                const wallCol = Math.min(current.col, next.col);
-                blocked = tempWalls.vertical && tempWalls.vertical.has(`${current.row}-${wallCol}`);
+            if (current.row === next.row) { // Horizontal move (left/right)
+                const minCol = Math.min(current.col, next.col);
+                blocked = tempWalls.vertical && tempWalls.vertical.has(`${current.row}-${minCol}`);
+            } else { // Vertical move (up/down)
+                const minRow = Math.min(current.row, next.row);
+                blocked = tempWalls.horizontal && tempWalls.horizontal.has(`${minRow}-${current.col}`);
             }
             
             // If not blocked, add to queue for exploration
@@ -240,15 +280,28 @@ function isValidWallPlacement(first, second) {
     const tempWalls = { horizontal: tempH_Walls, vertical: tempV_Walls };
     
     // CRITICAL RULE: Both players must always have a path to their goal
+    console.log(`🔍 PATH VALIDATION: Checking if wall placement blocks any player's path`);
+    console.log(`   Player 1 position: (${window.gameState.player1Position.row}, ${window.gameState.player1Position.col}) → Goal: row 0`);
+    console.log(`   Player 2 position: (${window.gameState.player2Position.row}, ${window.gameState.player2Position.col}) → Goal: row 8`);
+    console.log(`   Proposed wall: ${first.wallType} at ${firstKey}, ${secondKey}`);
+    
     const player1HasPath = hasPathToGoal(window.gameState.player1Position, 0, tempWalls);
     const player2HasPath = hasPathToGoal(window.gameState.player2Position, 8, tempWalls);
     
-    // Path validation ensures game rules are enforced
-    if (!player1HasPath || !player2HasPath) {
-        return false; // Wall placement would violate Quoridor rules
+    console.log(`   Player 1 has path to goal: ${player1HasPath}`);
+    console.log(`   Player 2 has path to goal: ${player2HasPath}`);
+    
+    if (!player1HasPath) {
+        console.log(`❌ WALL REJECTED: Would block Player 1's path to goal`);
+        return false;
+    }
+    if (!player2HasPath) {
+        console.log(`❌ WALL REJECTED: Would block Player 2's path to goal`);
+        return false;
     }
     
-    return player1HasPath && player2HasPath;
+    console.log(`✅ WALL VALIDATED: Both players maintain paths to their goals`);
+    return true;
 }
 window.isValidWallPlacement = isValidWallPlacement;
 
@@ -271,14 +324,46 @@ function handleCellClick(row, col) {
     // Prevent moves during AI turn
     if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) return;
 
+    const currentPos = window.gameState.currentPlayer === 1 ? window.gameState.player1Position : window.gameState.player2Position;
     const isValid = window.gameState.validMoves.some(m => m.row === row && m.col === col);
+    
+    // Debug player click
+    console.log(`🎯 PLAYER CLICK by Player ${window.gameState.currentPlayer}:`);
+    console.log(`   From: (${currentPos.row},${currentPos.col})`);
+    console.log(`   To: (${row},${col})`);
+    console.log(`   Valid moves:`, window.gameState.validMoves.map(m => `(${m.row},${m.col})`));
+    console.log(`   Move valid: ${isValid}`);
+    
     if (isValid) {
+        console.log(`✅ MOVE EXECUTED: Player ${window.gameState.currentPlayer} moved to (${row},${col})`);
         if (window.gameState.currentPlayer === 1) {
             window.gameState.player1Position = { row, col };
         } else {
             window.gameState.player2Position = { row, col };
         }
         endTurn();
+    } else {
+        console.log(`❌ MOVE BLOCKED: Player ${window.gameState.currentPlayer} cannot move to (${row},${col})`);
+        
+        // Check why the move was blocked
+        if (Math.abs(currentPos.row - row) + Math.abs(currentPos.col - col) !== 1) {
+            console.log(`   Reason: Not adjacent (distance > 1)`);
+        } else if (isWallBetween(currentPos, { row, col })) {
+            console.log(`   Reason: Wall blocks movement`);
+            
+            // Show which wall is blocking
+            if (currentPos.row === row) { // Horizontal move
+                const wallCol = Math.min(currentPos.col, col);
+                const wallKey = `${currentPos.row}-${wallCol}`;
+                console.log(`   Blocking wall: vertical wall at ${wallKey}`);
+            } else { // Vertical move
+                const wallRow = Math.min(currentPos.row, row);
+                const wallKey = `${wallRow}-${currentPos.col}`;
+                console.log(`   Blocking wall: horizontal wall at ${wallKey}`);
+            }
+        } else {
+            console.log(`   Reason: Other player occupies that position or invalid jump`);
+        }
     }
 }
 
@@ -287,10 +372,18 @@ function handleWallClick(wallType, row, col) {
     // Prevent moves during AI turn
     if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) return;
 
+    // Log which line between cubes was clicked
+    if (wallType === 'horizontal') {
+        console.log(`🖱️ WALL CLICK: Horizontal line between rows ${row} and ${row + 1}, columns ${col}-${col + 1}`);
+    } else {
+        console.log(`🖱️ WALL CLICK: Vertical line between columns ${col} and ${col + 1}, rows ${row}-${row + 1}`);
+    }
+
     if (window.gameState.wallPlacementStage === 1) {
         const wallKey = `${row}-${col}`;
         const isOccupied = wallType === 'horizontal' ? window.gameState.horizontalWalls.has(wallKey) : window.gameState.verticalWalls.has(wallKey);
         if (!isOccupied) {
+            console.log(`✅ First wall segment selected: ${wallType} at (${row},${col})`);
             window.gameState.firstWallSegment = { wallType, row, col };
             window.gameState.wallPlacementStage = 2;
             updateUI();
@@ -303,8 +396,11 @@ function handleWallClick(wallType, row, col) {
         const isAdjacent = possibleSeconds.some(p => p.wallType === wallType && p.row === row && p.col === col);
 
         if (isAdjacent && isValidWallPlacement(first, secondSegment)) {
+            console.log(`✅ Second wall segment selected: ${wallType} at (${row},${col})`);
             placeWall(first, secondSegment);
             endTurn();
+        } else {
+            console.log(`❌ Invalid second wall segment: ${wallType} at (${row},${col})`);
         }
         window.gameState.wallPlacementStage = 1;
         window.gameState.firstWallSegment = null;
@@ -322,26 +418,49 @@ function placeWall(seg1, seg2) {
     window.gameState.wallsRemaining[window.gameState.currentPlayer]--;
     
     // Debug wall placement
-    console.log(`Placed ${seg1.wallType} wall: ${seg1Key}, ${seg2Key}`);
-    console.log(`Current ${seg1.wallType} walls:`, Array.from(wallSet));
+    console.log(`🧱 WALL PLACED by Player ${window.gameState.currentPlayer}:`);
+    console.log(`   Type: ${seg1.wallType}`);
+    console.log(`   Segments: ${seg1Key}, ${seg2Key}`);
+    console.log(`   Walls remaining: P1=${window.gameState.wallsRemaining[1]}, P2=${window.gameState.wallsRemaining[2]}`);
+    console.log(`   Total ${seg1.wallType} walls:`, Array.from(wallSet));
     
     // Create wall mesh based on the actual segments positions
     const minRow = Math.min(seg1.row, seg2.row);
     const minCol = Math.min(seg1.col, seg2.col);
-    addWallMesh(seg1.wallType, minRow, minCol);
+    const maxRow = Math.max(seg1.row, seg2.row);
+    const maxCol = Math.max(seg1.col, seg2.col);
+    
+    // Position wall to cover exactly the 2 segments without overflow
+    console.log(`🎯 WALL POSITIONING CALCULATION:`);
+    console.log(`   Segments: (${seg1.row},${seg1.col}) and (${seg2.row},${seg2.col})`);
+    console.log(`   Min/Max: minRow=${minRow}, maxRow=${maxRow}, minCol=${minCol}, maxCol=${maxCol}`);
+    
+    // Calculate the center position between the two segments
+    const centerRow = (minRow + maxRow) / 2;
+    const centerCol = (minCol + maxCol) / 2;
+    console.log(`   Wall center position: (${centerRow}, ${centerCol})`);
+    addWallMesh(seg1.wallType, centerRow, centerCol);
 }
 window.placeWall = placeWall;
 
 function endTurn() {
     const winner = checkWinner();
     if (winner) {
+        console.log(`🏆 GAME WON by Player ${winner}!`);
         window.gameState.winner = winner;
         updateScene();
         updateUI();
         return;
     }
+    
+    const previousPlayer = window.gameState.currentPlayer;
     window.gameState.currentPlayer = window.gameState.currentPlayer === 1 ? 2 : 1;
     window.gameState.gameMode = 'move';
+    
+    console.log(`🔄 TURN END: Player ${previousPlayer} → Player ${window.gameState.currentPlayer}`);
+    console.log(`   Player 1 pos: (${window.gameState.player1Position.row},${window.gameState.player1Position.col})`);
+    console.log(`   Player 2 pos: (${window.gameState.player2Position.row},${window.gameState.player2Position.col})`);
+    
     calculateValidMoves();
     updateScene();
     updateUI();
@@ -399,28 +518,45 @@ async function loadPawns() {
     window.pawns[2] = cornModel;
 }
 
-function addWallMesh(type, row, col) {
-    // Create a wall that spans 2 segments (2 grid positions)
-    const wallGeo = new THREE.BoxGeometry(
-        type === 'horizontal' ? window.CELL_SIZE * 2 - window.WALL_WIDTH : window.WALL_WIDTH,
-        window.WALL_HEIGHT,
-        type === 'horizontal' ? window.WALL_WIDTH : window.CELL_SIZE * 2 - window.WALL_WIDTH
-    );
-    const wallMesh = new THREE.Mesh(wallGeo, window.materials.wall);
+function addWallMesh(wallType, row, col) {
+    const wallHeight = window.WALL_HEIGHT;
+    const wallThickness = window.WALL_WIDTH;
     
-    // Position the wall centered between the segments
-    // For horizontal walls: center between col and col+1
-    // For vertical walls: center between row and row+1
-    const wallX = window.BOARD_OFFSET + col * window.CELL_SIZE + (type === 'horizontal' ? window.CELL_SIZE : 0) + window.CELL_SIZE / 2;
-    const wallZ = window.BOARD_OFFSET + row * window.CELL_SIZE + (type === 'vertical' ? window.CELL_SIZE : 0) + window.CELL_SIZE / 2;
+    let geometry, position;
     
-    wallMesh.position.set(
-        wallX,
-        window.WALL_HEIGHT / 2 + window.CUBE_HEIGHT,
-        wallZ
-    );
+    if (wallType === 'horizontal') {
+        // Horizontal wall spans 2 columns - match placeholder positioning exactly
+        geometry = new THREE.BoxGeometry(window.CELL_SIZE * 2, wallHeight, wallThickness);
+        position = {
+            x: window.BOARD_OFFSET + col * window.CELL_SIZE + window.CELL_SIZE/2, // Same as placeholder
+            y: wallHeight / 2,
+            z: window.BOARD_OFFSET + row * window.CELL_SIZE + window.CELL_SIZE/2 // Same as placeholder
+        };
+    } else { // vertical  
+        // Vertical wall spans 2 rows - match placeholder positioning exactly
+        geometry = new THREE.BoxGeometry(wallThickness, wallHeight, window.CELL_SIZE * 2);
+        position = {
+            x: window.BOARD_OFFSET + col * window.CELL_SIZE + window.CELL_SIZE/2, // Same as placeholder
+            y: wallHeight / 2,
+            z: window.BOARD_OFFSET + row * window.CELL_SIZE + window.CELL_SIZE/2 // Same as placeholder
+        };
+    }
+    
+    // Log the actual world coordinates where the wall is placed
+    console.log(`📍 WALL MESH PLACED:`);
+    console.log(`   Type: ${wallType}`);
+    console.log(`   Segment coordinates: (${row}, ${col})`);
+    console.log(`   World position: x=${position.x}, z=${position.z}`);
+    console.log(`   Calculation: BOARD_OFFSET=${window.BOARD_OFFSET}, CELL_SIZE=${window.CELL_SIZE}`);
+    console.log(`   X calc: ${window.BOARD_OFFSET} + ${col} * ${window.CELL_SIZE} + ${window.CELL_SIZE/2} = ${position.x}`);
+    console.log(`   Z calc: ${window.BOARD_OFFSET} + ${row} * ${window.CELL_SIZE} + ${window.CELL_SIZE/2} = ${position.z}`);
+    
+    const wallMesh = new THREE.Mesh(geometry, window.materials.wall);
+    wallMesh.position.set(position.x, position.y, position.z);
     wallMesh.castShadow = true;
     wallMesh.receiveShadow = true;
+    wallMesh.userData = { type: 'wall', wallType, row, col };
+    
     window.wallsGroup.add(wallMesh);
 }
 
@@ -625,13 +761,20 @@ function onMouseMove(event) {
 function onClick(event) {
     if (window.gameState.winner) return;
     window.raycaster.setFromCamera(window.mouse, window.camera);
-    const intersects = window.raycaster.intersectObjects(window.boardGroup.children, true);
-    if (intersects.length > 0) {
-        const { userData } = intersects[0].object;
+    
+    // Check both board group and walls group for clicks
+    const boardIntersects = window.raycaster.intersectObjects(window.boardGroup.children, true);
+    const wallIntersects = window.raycaster.intersectObjects(window.wallsGroup.children, true);
+    const allIntersects = [...boardIntersects, ...wallIntersects].sort((a, b) => a.distance - b.distance);
+    
+    if (allIntersects.length > 0) {
+        const { userData } = allIntersects[0].object;
         if(userData.type === 'cell') {
             handleCellClick(userData.row, userData.col);
         } else if (userData.type?.includes('wall_placeholder')) {
             handleWallClick(userData.wallType, userData.row, userData.col);
+        } else if (userData.type === 'wall') {
+            console.log(`Clicked on wall: ${userData.wallType} at (${userData.row}, ${userData.col})`);
         }
     }
 }

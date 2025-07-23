@@ -90,6 +90,11 @@ function updateScene() {
 }
 
 function updateUI() {
+    // Check if gameState is properly initialized
+    if (!window.gameState || !window.gameState.wallsRemaining) {
+        return;
+    }
+    
     document.getElementById('p1-status').textContent = t('player1Walls', window.gameState.wallsRemaining[1]);
     
     // Update Player 2 status based on game mode
@@ -153,20 +158,44 @@ function updateUI() {
     // Disable controls during AI turn
     const isAiTurn = window.gameMode === 'pvc' && window.gameState.currentPlayer === 2;
     
-    document.getElementById('move-btn').classList.toggle('active', window.gameState.gameMode === 'move');
-    document.getElementById('wall-btn').classList.toggle('active', window.gameState.gameMode === 'wall');
-    document.getElementById('move-btn').disabled = isAiTurn || window.gameState.winner;
-    document.getElementById('wall-btn').disabled = isAiTurn || window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0 || window.gameState.winner;
-    
+    // Update both menu buttons and main action buttons
+    const moveBtn = document.getElementById('move-btn');
     const wallBtn = document.getElementById('wall-btn');
-    if (window.gameState.gameMode === 'wall') {
-        if (window.gameState.wallPlacementStage === 2) {
-            wallBtn.innerHTML = `<span>❌</span><span class="btn-text">${t('cancelWallBtn')}</span>`;
+    
+    if (moveBtn) {
+        moveBtn.classList.toggle('active', window.gameState.gameMode === 'move');
+        moveBtn.disabled = isAiTurn || window.gameState.winner;
+    }
+    
+    if (wallBtn) {
+        wallBtn.classList.toggle('active', window.gameState.gameMode === 'wall');
+        wallBtn.disabled = isAiTurn || window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0 || window.gameState.winner;
+        
+        // Update wall button text if it has btn-text class (menu button)
+        const btnText = wallBtn.querySelector('.btn-text');
+        const btnLabel = wallBtn.querySelector('.btn-label');
+        
+        if (window.gameState.gameMode === 'wall') {
+            if (window.gameState.wallPlacementStage === 2) {
+                if (btnText) wallBtn.innerHTML = `<span>❌</span><span class="btn-text">${t('cancelWallBtn')}</span>`;
+                if (btnLabel) {
+                    wallBtn.querySelector('span:first-child').textContent = '❌';
+                    btnLabel.textContent = 'Cancel';
+                }
+            } else {
+                if (btnText) wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallStepBtn', window.gameState.wallPlacementStage)}</span>`;
+                if (btnLabel) {
+                    wallBtn.querySelector('span:first-child').textContent = '🧱';
+                    btnLabel.textContent = 'Wall';
+                }
+            }
         } else {
-            wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallStepBtn', window.gameState.wallPlacementStage)}</span>`;
+            if (btnText) wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallBtn')}</span>`;
+            if (btnLabel) {
+                wallBtn.querySelector('span:first-child').textContent = '🧱';
+                btnLabel.textContent = 'Wall';
+            }
         }
-    } else {
-        wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallBtn')}</span>`;
     }
 }
 
@@ -188,35 +217,45 @@ function setGameMode(mode) {
 
 // Game mode selection functions
 function showGameModeSelection() {
-    document.getElementById('game-mode-selection').style.display = 'block';
-    document.getElementById('main-ui').style.display = 'none';
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.classList.remove('hidden');
+    }
+    // Hide main controls during selection
+    const mainControls = document.getElementById('main-controls');
+    if (mainControls) {
+        mainControls.style.display = 'none';
+    }
 }
 
 function hideGameModeSelection() {
-    document.getElementById('game-mode-selection').style.display = 'none';
-    document.getElementById('main-ui').style.display = 'flex';
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.classList.add('hidden');
+    }
+    // Show main controls after selection
+    const mainControls = document.getElementById('main-controls');
+    if (mainControls) {
+        mainControls.style.display = 'flex';
+    }
 }
 
 function selectGameMode(mode) {
-    console.log('selectGameMode called with:', mode); // Debug log
     window.gameMode = mode;
     if (mode === 'pvc') {
+        // Show difficulty selection in start screen
         const difficultySelection = document.getElementById('difficulty-selection');
-        console.log('Found difficulty-selection element:', difficultySelection); // Debug log
         if (difficultySelection) {
             difficultySelection.style.display = 'block';
-            difficultySelection.style.visibility = 'visible';
-            difficultySelection.style.opacity = '1';
-            console.log('Set difficulty-selection to visible'); // Debug log
-        } else {
-            console.error('difficulty-selection element not found!');
+        }
+        
+        // Hide game mode buttons
+        const gameModeButtons = document.querySelector('.start-game-modes');
+        if (gameModeButtons) {
+            gameModeButtons.style.display = 'none';
         }
     } else {
-        // Hide difficulty selection for PvP mode
-        const difficultySelection = document.getElementById('difficulty-selection');
-        if (difficultySelection) {
-            difficultySelection.style.display = 'none';
-        }
+        // Start PvP game immediately
         startNewGame();
     }
 }
@@ -408,6 +447,20 @@ function setupGameModeEventListeners() {
 // Initialize event listeners
 setupGameModeEventListeners();
 
+// Menu toggle functionality
+function toggleMenu() {
+    const menu = document.getElementById('game-menu');
+    menu.classList.toggle('collapsed');
+    
+    // Update menu icon
+    const menuIcon = document.querySelector('.menu-icon');
+    if (menu.classList.contains('collapsed')) {
+        menuIcon.textContent = '☰';
+    } else {
+        menuIcon.textContent = '✕';
+    }
+}
+
 // Export functions for global access
 window.updateUI = updateUI;
 window.updateScene = updateScene;
@@ -419,3 +472,4 @@ window.selectDifficulty = selectDifficulty;
 window.checkAiTurn = checkAiTurn;
 window.showMobileHelp = showMobileHelp;
 window.hideMobileHelp = hideMobileHelp;
+window.toggleMenu = toggleMenu;

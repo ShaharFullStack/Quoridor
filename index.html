@@ -11,74 +11,140 @@
     <div id="game-container">
         <div class="stars" id="stars-container"></div>
         <canvas id="c"></canvas>
-        <div id="ui-container">
-            <button id="language-toggle">🌐 עברית</button>
-            
-            <!-- Game Mode Selection -->
-            <div id="game-mode-selection" style="display: none;">
-                <div id="header" class="ui-panel">
+        <!-- Starting Screen Overlay -->
+        <div id="start-screen" class="start-screen">
+            <button id="start-language-toggle" class="start-lang-toggle" onclick="switchLanguage()">
+                <span>🌐</span> <span class="btn-text">עברית</span>
+            </button>
+            <div class="start-content">
+                <div class="game-logo">
                     <h1>Quoridor 3D</h1>
-                    <p id="game-description">Reach the other side of the board before your opponent!</p>
+                    <p id="game-description">Reach the other side before your opponent!</p>
                 </div>
                 
-                <div class="ui-panel" style="text-align: center;">
-                    <h2 id="game-mode-title">Game Mode</h2>
-                    <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1rem;">
-                        <button class="control-btn" onclick="selectGameMode('pvp')">
-                            <span>👥</span><span class="btn-text" id="pvp-btn-text">Player vs Player</span>
+                <div class="start-game-modes">
+                    <button class="start-btn" onclick="selectGameMode('pvp')">
+                        <div class="btn-icon">👥</div>
+                        <div class="btn-content">
+                            <div class="btn-title" id="pvp-btn-text">Player vs Player</div>
+                            <div class="btn-subtitle" id="pvp-subtitle">Play against a friend</div>
+                        </div>
+                    </button>
+                    <button class="start-btn" onclick="selectGameMode('pvc')">
+                        <div class="btn-icon">🤖</div>
+                        <div class="btn-content">
+                            <div class="btn-title" id="pvc-btn-text">Player vs AI</div>
+                            <div class="btn-subtitle" id="pvc-subtitle">Challenge the computer</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div id="difficulty-selection" class="difficulty-selection" style="display: none;">
+                    <h3 id="difficulty-title">Choose AI Difficulty</h3>
+                    <div class="difficulty-options">
+                        <button class="difficulty-btn" onclick="selectDifficulty('easy')">
+                            <span>😊</span>
+                            <div>
+                                <div class="diff-title" id="easy-btn-text">Easy</div>
+                                <div class="diff-desc" id="easy-desc">Relaxed gameplay</div>
+                            </div>
                         </button>
-                        <button class="control-btn" onclick="selectGameMode('pvc')">
-                            <span>🤖</span><span class="btn-text" id="pvc-btn-text">Player vs AI</span>
+                        <button class="difficulty-btn" onclick="selectDifficulty('medium')">
+                            <span>🤔</span>
+                            <div>
+                                <div class="diff-title" id="medium-btn-text">Medium</div>
+                                <div class="diff-desc" id="medium-desc">Balanced challenge</div>
+                            </div>
+                        </button>
+                        <button class="difficulty-btn" onclick="selectDifficulty('hard')">
+                            <span>😤</span>
+                            <div>
+                                <div class="diff-title" id="hard-btn-text">Hard</div>
+                                <div class="diff-desc" id="hard-desc">Expert level</div>
+                            </div>
                         </button>
                     </div>
-                    
-                    <div id="difficulty-selection" style="display: none;">
-                        <h3 id="difficulty-title">AI Difficulty</h3>
-                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                            <button class="control-btn" onclick="selectDifficulty('easy')">
-                                <span>😊</span><span class="btn-text" id="easy-btn-text">Easy</span>
-                            </button>
-                            <button class="control-btn" onclick="selectDifficulty('medium')">
-                                <span>🤔</span><span class="btn-text" id="medium-btn-text">Medium</span>
-                            </button>
-                            <button class="control-btn" onclick="selectDifficulty('hard')">
-                                <span>😤</span><span class="btn-text" id="hard-btn-text">Hard</span>
-                            </button>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <div id="main-controls" class="main-controls">
+            <button id="move-btn" class="action-btn active">
+                <span>🚶</span>
+                <span class="btn-label">Move</span>
+            </button>
+            <button id="wall-btn" class="action-btn">
+                <span>🧱</span>
+                <span class="btn-label">Wall</span>
+            </button>
+            <button id="main-language-toggle" class="action-btn" onclick="switchLanguage()">
+                <span>🌐</span>
+                <span class="btn-label">עברית</span>
+            </button>
+        </div>
+
+        <!-- Foldable Menu -->
+        <div id="game-menu" class="game-menu collapsed">
+            <button id="menu-toggle" class="menu-toggle" onclick="toggleMenu()">
+                <span class="menu-icon">☰</span>
+            </button>
+            
+            <div class="menu-content">
+                <!-- Game Status -->
+                <div id="main-ui" class="menu-section">
+                    <div class="game-status">
+                        <h3>Game Status</h3>
+                        <div class="players-info">
+                            <div id="p1-status" class="player-info">Player 1: 10 walls</div>
+                            <div id="p2-status" class="player-info">Player 2: 10 walls</div>
                         </div>
+                        <div id="turn-indicator" class="turn-info">
+                            <span class="loading-spinner"></span> Loading models...
+                        </div>
+                        <div id="action-prompt" class="action-info"></div>
+                    </div>
+                </div>
+                
+                <!-- Game Controls -->
+                <div class="menu-section">
+                    <h3>Game Controls</h3>
+                    <div class="game-controls">
+                        <button id="reset-btn" class="menu-btn">
+                            <span>🔄</span> <span class="btn-text">New Game</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Settings -->
+                <div class="menu-section">
+                    <h3>Settings</h3>
+                    <div class="settings-controls">
+                        <button id="language-toggle" class="menu-btn">
+                            <span>🌐</span> <span class="btn-text">Language</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Game Info -->
+                <div class="menu-section">
+                    <h3>How to Play</h3>
+                    <div class="game-info">
+                        <p>🎯 <strong>Goal:</strong> Reach the opposite side of the board</p>
+                        <p>🚶 <strong>Move:</strong> Click on highlighted squares to move your piece</p>
+                        <p>🧱 <strong>Walls:</strong> Place walls to block your opponent's path</p>
+                        <p>⚡ <strong>Tip:</strong> You can jump over your opponent!</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Main Game UI -->
-            <div id="main-ui" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-                <div id="header" class="ui-panel">
-                    <h1>Quoridor 3D</h1>
-                    <p id="game-description">Reach the other side of the board before your opponent!</p>
-                </div>
-
-                <div id="winner-message"></div>
-
-                <div id="controls-status-wrapper">
-                    <div id="status-panel" class="ui-panel">
-                        <div class="players">
-                            <div id="p1-status" class="player-info" style="color: #2563eb;">Player 1: 10 walls</div>
-                            <div id="p2-status" class="player-info" style="color: #dc2626;">Player 2: 10 walls</div>
-                        </div>
-                        <div id="turn-indicator"><span class="loading-spinner"></span> Loading models...</div>
-                        <div id="action-prompt"></div>
-                    </div>
-                    <div id="controls-panel" class="ui-panel">
-                        <button id="move-btn" class="control-btn active"><span>🚶</span><span class="btn-text">Move</span></button>
-                        <button id="wall-btn" class="control-btn"><span>🧱</span><span class="btn-text">Place Wall</span></button>
-                        <button id="reset-btn" class="control-btn"><span>🔄</span><span class="btn-text">New Game</span></button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Mobile Help Text -->
-            <div id="mobile-help" class="mobile-help">
-                Tap to move • Double-tap to switch modes
-            </div>
+            <div id="winner-message" class="winner-overlay"></div>
+        </div>
+        
+        <!-- Mobile Help Text -->
+        <div id="mobile-help" class="mobile-help">
+            Tap to move • Double-tap to switch modes
         </div>
     </div>
 
