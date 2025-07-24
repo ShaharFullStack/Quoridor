@@ -226,6 +226,10 @@ function setupWinnerOverlayButtons() {
         // Remove any existing onclick to prevent conflicts
         menuBtn.removeAttribute('onclick');
         
+        // Remove existing event listeners
+        const newMenuBtn = menuBtn.cloneNode(true);
+        menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+        
         const handleMenuClick = (e) => {
             e.preventDefault();
             // Hide winner overlay and show main menu
@@ -233,13 +237,17 @@ function setupWinnerOverlayButtons() {
             showGameModeSelection();
         };
         
-        menuBtn.addEventListener('click', handleMenuClick);
-        menuBtn.addEventListener('touchend', handleMenuClick);
+        newMenuBtn.addEventListener('click', handleMenuClick);
+        newMenuBtn.addEventListener('touchend', handleMenuClick);
     }
     
     if (replayBtn) {
         // Remove any existing onclick to prevent conflicts
         replayBtn.removeAttribute('onclick');
+        
+        // Remove existing event listeners
+        const newReplayBtn = replayBtn.cloneNode(true);
+        replayBtn.parentNode.replaceChild(newReplayBtn, replayBtn);
         
         const handleReplayClick = (e) => {
             e.preventDefault();
@@ -247,8 +255,8 @@ function setupWinnerOverlayButtons() {
             startNewGame();
         };
         
-        replayBtn.addEventListener('click', handleReplayClick);
-        replayBtn.addEventListener('touchend', handleReplayClick);
+        newReplayBtn.addEventListener('click', handleReplayClick);
+        newReplayBtn.addEventListener('touchend', handleReplayClick);
     }
 }
 
@@ -342,7 +350,7 @@ function showGameModeSelection() {
         if (menuIcon) menuIcon.textContent = '☰';
     }
     
-    // Reset difficulty selection and game mode buttons
+    // Reset difficulty selection and game mode buttons to initial state
     const difficultySelection = document.getElementById('difficulty-selection');
     if (difficultySelection) {
         difficultySelection.style.display = 'none';
@@ -353,9 +361,40 @@ function showGameModeSelection() {
         gameModeButtons.style.display = 'block';
     }
     
+    // Reset button onclick attributes to match initial HTML state
+    const pvpBtn = document.querySelector('button[onclick*="pvp"], .start-btn:first-of-type');
+    const pvcBtn = document.querySelector('button[onclick*="pvc"], .start-btn:last-of-type');
+    
+    if (pvpBtn && !pvpBtn.getAttribute('onclick')) {
+        pvpBtn.setAttribute('onclick', "selectGameMode('pvp')");
+    }
+    if (pvcBtn && !pvcBtn.getAttribute('onclick')) {
+        pvcBtn.setAttribute('onclick', "selectGameMode('pvc')");
+    }
+    
+    // Reset difficulty buttons to initial state
+    const easyBtn = document.querySelector('button[onclick*="easy"], .difficulty-btn:nth-child(1)');
+    const mediumBtn = document.querySelector('button[onclick*="medium"], .difficulty-btn:nth-child(2)');
+    const hardBtn = document.querySelector('button[onclick*="hard"], .difficulty-btn:nth-child(3)');
+    
+    if (easyBtn && !easyBtn.getAttribute('onclick')) {
+        easyBtn.setAttribute('onclick', "selectDifficulty('easy')");
+    }
+    if (mediumBtn && !mediumBtn.getAttribute('onclick')) {
+        mediumBtn.setAttribute('onclick', "selectDifficulty('medium')");
+    }
+    if (hardBtn && !hardBtn.getAttribute('onclick')) {
+        hardBtn.setAttribute('onclick', "selectDifficulty('hard')");
+    }
+    
     // Clear any previous game mode
     window.gameMode = null;
     window.aiPlayer = null;
+    
+    // Re-setup event listeners to ensure consistency
+    setTimeout(() => {
+        setupGameModeEventListeners();
+    }, 100);
 }
 
 function hideGameModeSelection() {

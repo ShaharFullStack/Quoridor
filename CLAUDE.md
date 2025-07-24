@@ -67,7 +67,7 @@ User reported that walls were being placed with "one cube offset" and after few 
 - Preserved performance optimizations
 - **Status**: ✅ COMPLETED
 
-### Phase 3: Character Movement Animation (LATEST)
+### Phase 3: Character Movement Animation
 
 #### Request 3A: Character Movement Animation
 **User Request**: "add some movement for the characters when they move a cube, right now they just appear in the selected cube, i want some motion"  
@@ -81,7 +81,29 @@ User reported that walls were being placed with "one cube offset" and after few 
   - `js/ui.js`: Animation system implementation
   - `js/game.js`: Human player move integration  
   - `js/ai.js`: AI player move integration
-- **Status**: ✅ COMPLETED - AWAITING USER TESTING
+- **Status**: ✅ COMPLETED - USER ACCEPTED
+
+### Phase 4: Post-Animation Bug Fixes & Internationalization (LATEST)
+
+#### Request 4A: Opening Screen Overflow & Translation Issues
+**User Request**: "there is an overflow now on the opening screen, fix it and also fix all missing translations and the ones who won't switch language when changing the language"
+**Implementation**:
+- **Opening Screen Overflow Fix**: Modified `.start-content` CSS from `min-height: calc(100dvh - 40px)` to `max-height` with `flex: 1` to prevent overflow
+- **Missing Translations**: Added complete translation coverage for all UI elements including:
+  - Menu section headers (Game Status, Game Controls, Settings, How to Play)
+  - Winner overlay buttons (Main Menu, Play Again)
+  - Menu buttons (Restart, Undo Move, Sound, Dark Mode, Fullscreen)
+  - All game interface elements
+- **Language Switching Enhancement**: 
+  - Enhanced `updateAllText()` function to properly update all elements
+  - Added re-attachment of event listeners after innerHTML changes
+  - Implemented RTL CSS support for Hebrew language
+  - Fixed winner overlay button functionality after language changes
+- **Files Modified**:
+  - `styles.css`: Fixed overflow and added RTL support
+  - `js/language.js`: Added missing translations and enhanced update system
+  - `js/ui.js`: Improved winner overlay button handling after language changes
+- **Status**: ✅ COMPLETED - NEEDS USER VERIFICATION
 
 ## Current Game Features & Status
 
@@ -92,13 +114,13 @@ User reported that walls were being placed with "one cube offset" and after few 
 - **Animation**: Wall placement with scale-up visual effect
 - **User Status**: ACCEPTED AS WORKING SOLUTION
 
-### Movement System (NEW)
+### Movement System
 - **Player Movement**: Smooth animated transitions between cubes
 - **Animation Style**: Arc motion with subtle jump effect
 - **AI Integration**: Same animation system for AI moves
 - **Visual Tracking**: Player spotlights follow during movement
 - **Performance**: Optimized with proper frame management
-- **Status**: IMPLEMENTED - NEEDS USER TESTING
+- **Status**: IMPLEMENTED - USER ACCEPTED
 
 ### Visual Features
 - **Materials**: Enhanced PBR materials throughout
@@ -108,9 +130,17 @@ User reported that walls were being placed with "one cube offset" and after few 
 - **UI Animations**: Complete modal animation system
 - **Status**: COMPLETED AND ACCEPTED
 
+### Internationalization System (NEW)
+- **Languages**: English and Hebrew support with RTL text direction
+- **Translation Coverage**: Complete UI translation including all menus, buttons, and overlays
+- **Dynamic Switching**: Real-time language switching with proper event listener re-attachment
+- **Mobile Responsive**: RTL layout support for Hebrew on all screen sizes
+- **Winner Overlay**: Proper translation and event handling after language changes
+- **Status**: COMPLETED - NEEDS USER VERIFICATION
+
 ## Technical Architecture
 
-### Animation System (NEW)
+### Animation System
 ```javascript
 // Global animation state tracking
 window.playerAnimations = {
@@ -124,6 +154,22 @@ function animatePlayerMovement(playerNum, fromPos, toPos, callback) {
     // Arc height using Math.sin for natural jump motion
     // Spotlight tracking during movement
     // Callback-based turn management
+}
+```
+
+### Internationalization System
+```javascript
+// Translation object with English and Hebrew
+const translations = {
+    en: { /* all English translations */ },
+    he: { /* all Hebrew translations with RTL support */ }
+};
+
+// Enhanced text update function
+function updateAllText() {
+    // Updates all UI elements including winner overlay buttons
+    // Re-attaches event listeners after innerHTML changes
+    // Handles RTL layout switching for Hebrew
 }
 ```
 
@@ -144,11 +190,12 @@ function animatePlayerMovement(playerNum, fromPos, toPos, callback) {
 ### Core Logic Files
 - **js/game.js**: Wall placement fixes, animation integration for human moves
 - **js/ai.js**: Animation integration for AI moves
-- **js/ui.js**: Complete animation system implementation, scene management
+- **js/ui.js**: Complete animation system implementation, scene management, winner overlay fixes
+- **js/language.js**: Complete internationalization system with RTL support
 - **js/globals.js**: Unchanged (stable configuration)
 
 ### Visual/UI Files  
-- **styles.css**: Extensive modal animations, responsive improvements
+- **styles.css**: Extensive modal animations, responsive improvements, RTL layout support, overflow fixes
 - **index.html**: Unchanged (good separation maintained)
 
 ### Documentation Files
@@ -164,15 +211,18 @@ function animatePlayerMovement(playerNum, fromPos, toPos, callback) {
 5. **Performance Awareness**: User specifically requested CPU optimization consideration
 
 ## Next Steps
-- **Immediate**: Awaiting user testing/feedback on character movement animations
-- **Potential**: Based on user feedback, may need animation speed/style adjustments
+- **Immediate**: Awaiting user verification of overflow fix and translation completeness
+- **Potential**: Based on user feedback, may need translation adjustments or additional UI improvements
 - **Future**: User may request additional game features or optimizations
 
 ## Current Working Status
 ✅ Wall placement: USER ACCEPTED (1-step system working correctly)  
 ✅ Visual enhancements: COMPLETED (CPU optimized)  
 ✅ Modal animations: COMPLETED  
-⏳ Character movement animations: IMPLEMENTED - AWAITING USER TESTING
+✅ Character movement animations: COMPLETED - USER ACCEPTED
+✅ Opening screen overflow: FIXED (CSS layout corrected)
+✅ Missing translations: COMPLETED (full coverage added)
+⏳ Language switching issues: FIXED - NEEDS USER VERIFICATION
 
 ## Development Notes
 - Maintained clean code architecture throughout all changes

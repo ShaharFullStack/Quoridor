@@ -37,7 +37,18 @@ const translations = {
         difficultyTitle: 'Choose AI Difficulty',
         startGameBtn: 'Start Game',
         mobileHelp: 'Tap to move • Double-tap to switch modes',
-        languageToggle: '🌐 עברית'
+        languageToggle: '🌐 עברית',
+        restartBtn: 'Restart',
+        undoBtn: 'Undo Move',
+        soundBtn: 'Sound',
+        themeBtn: 'Dark Mode',
+        fullscreenBtn: 'Fullscreen',
+        mainMenuBtn: 'Main Menu',
+        playAgainBtn: 'Play Again',
+        gameStatusTitle: 'Game Status',
+        gameControlsTitle: 'Game Controls',
+        settingsTitle: 'Settings',
+        howToPlayTitle: 'How to Play'
     },
     he: {
         gameTitle: 'קורידור תלת מימד',
@@ -74,7 +85,18 @@ const translations = {
         difficultyTitle: 'בחר רמת קושי',
         startGameBtn: 'התחל משחק',
         mobileHelp: 'הקש כדי לזוז • הקש פעמיים להחלפת מצבים',
-        languageToggle: '🌐 English'
+        languageToggle: '🌐 English',
+        restartBtn: 'הפעל מחדש',
+        undoBtn: 'בטל מהלך',
+        soundBtn: 'צליל',
+        themeBtn: 'מצב כהה',
+        fullscreenBtn: 'מסך מלא',
+        mainMenuBtn: 'תפריט ראשי',
+        playAgainBtn: 'שחק שוב',
+        gameStatusTitle: 'מצב המשחק',
+        gameControlsTitle: 'פקדי משחק',
+        settingsTitle: 'הגדרות',
+        howToPlayTitle: 'איך לשחק'
     }
 };
 
@@ -174,14 +196,45 @@ function updateAllText() {
     const resetBtnText = document.querySelector('#reset-btn .btn-text');
     if (resetBtnText) resetBtnText.textContent = t('newGameBtn');
     
-    // Update menu section headers
+    const restartBtnText = document.querySelector('#restart-btn .btn-text');
+    if (restartBtnText) restartBtnText.textContent = t('restartBtn');
+    
+    const undoBtnText = document.querySelector('#undo-btn .btn-text');
+    if (undoBtnText) undoBtnText.textContent = t('undoBtn');
+    
+    const soundBtnText = document.querySelector('#sound-toggle .btn-text');
+    if (soundBtnText) soundBtnText.textContent = t('soundBtn');
+    
+    const themeBtnText = document.querySelector('#theme-toggle .btn-text');
+    if (themeBtnText) themeBtnText.textContent = t('themeBtn');
+    
+    const fullscreenBtnText = document.querySelector('#fullscreen-btn .btn-text');
+    if (fullscreenBtnText) fullscreenBtnText.textContent = t('fullscreenBtn');
+    
+    // Update winner overlay buttons
+    const winnerMenuBtn = document.getElementById('winner-menu-btn');
+    if (winnerMenuBtn) {
+        winnerMenuBtn.innerHTML = `🏠 ${t('mainMenuBtn')}`;
+    }
+    
+    const winnerReplayBtn = document.getElementById('winner-replay-btn');
+    if (winnerReplayBtn) {
+        winnerReplayBtn.innerHTML = `🔄 ${t('playAgainBtn')}`;
+    }
+    
+    // Re-setup winner overlay buttons after innerHTML changes
+    if (typeof setupWinnerOverlayButtons === 'function') {
+        setTimeout(setupWinnerOverlayButtons, 50);
+    }
+    
+    // Update menu section headers using translation keys
     const menuSections = document.querySelectorAll('.menu-section h3');
     if (menuSections.length >= 3) {
-        menuSections[0].textContent = currentLanguage === 'he' ? 'מצב המשחק' : 'Game Status';
-        menuSections[1].textContent = currentLanguage === 'he' ? 'פקדי משחק' : 'Game Controls';
-        menuSections[2].textContent = currentLanguage === 'he' ? 'הגדרות' : 'Settings';
+        menuSections[0].textContent = t('gameStatusTitle');
+        menuSections[1].textContent = t('gameControlsTitle');
+        menuSections[2].textContent = t('settingsTitle');
         if (menuSections[3]) {
-            menuSections[3].textContent = currentLanguage === 'he' ? 'איך לשחק' : 'How to Play';
+            menuSections[3].textContent = t('howToPlayTitle');
         }
     }
     

@@ -161,8 +161,11 @@ canvas {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 40px);
-    min-height: calc(100dvh - 40px);
+    flex: 1;
+    min-height: 0; /* Allow content to shrink */
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
 }
 
 .game-logo h1 {
@@ -1371,5 +1374,53 @@ canvas {
         background: linear-gradient(145deg, 
             rgba(255, 255, 255, 0.2), 
             rgba(255, 255, 255, 0.1));
+    }
+}
+
+/* ===== RTL SUPPORT FOR HEBREW ===== */
+.rtl {
+    direction: rtl;
+}
+
+.rtl .start-content {
+    text-align: center; /* Keep centered for start screen */
+}
+
+.rtl .btn-content {
+    text-align: right;
+}
+
+.rtl .start-btn,
+.rtl .difficulty-btn {
+    flex-direction: row-reverse;
+}
+
+.rtl .game-menu {
+    left: 0;
+    right: auto;
+}
+
+.rtl .start-lang-toggle {
+    left: 20px;
+    right: auto;
+}
+
+.rtl .menu-btn {
+    flex-direction: row-reverse;
+}
+
+.rtl .game-info {
+    text-align: right;
+}
+
+.rtl .winner-actions {
+    flex-direction: row-reverse;
+}
+
+/* Mobile RTL adjustments */
+@media (max-width: 480px) {
+    .rtl .start-lang-toggle {
+        left: 16px;
+        right: auto;
     }
 }
