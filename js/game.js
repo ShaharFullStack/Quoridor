@@ -356,8 +356,8 @@ window.endTurn = endTurn;
 // --- [NEW] Helper function to generate a smoke texture on the fly ---
 function createSmokeTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 256;
+    canvas.height = 256;
     const context = canvas.getContext('2d');
     const gradient = context.createRadialGradient(
         canvas.width / 2, canvas.height / 2, 0,
@@ -373,7 +373,7 @@ function createSmokeTexture() {
 
 // --- [NEW] Creates a particle system for the smoke effect ---
 function createSmokeEffect() {
-    const particleCount = 75;
+    const particleCount = 25;
     const positions = new Float32Array(particleCount * 3);
     const opacities = new Float32Array(particleCount);
     const particleData = [];
@@ -382,7 +382,7 @@ function createSmokeEffect() {
     const smokeTexture = createSmokeTexture();
 
     const material = new THREE.PointsMaterial({
-        size: 0.9,
+        size: 1.2,
         map: smokeTexture,
         blending: THREE.NormalBlending,
         transparent: true,
