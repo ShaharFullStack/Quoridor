@@ -302,14 +302,14 @@ if (document.readyState === 'loading') {
                 if (btnText) wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallStepBtn', window.gameState.wallPlacementStage)}</span>`;
                 if (btnLabel) {
                     wallBtn.querySelector('span:first-child').textContent = '🧱';
-                    btnLabel.textContent = 'Wall';
+                    btnLabel.textContent = 'חומה';
                 }
             }
         } else {
             if (btnText) wallBtn.innerHTML = `<span>🧱</span><span class="btn-text">${t('wallBtn')}</span>`;
             if (btnLabel) {
                 wallBtn.querySelector('span:first-child').textContent = '🧱';
-                btnLabel.textContent = 'Wall';
+                btnLabel.textContent = 'חומה' || 'Wall';
             }
         }
     }
