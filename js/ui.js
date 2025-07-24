@@ -217,22 +217,40 @@ function updateUI() {
         }
         document.getElementById('action-prompt').textContent = promptText;
     }
-// Winner overlay button handlers
+// Winner overlay button handlers with mobile support
 function setupWinnerOverlayButtons() {
     const menuBtn = document.getElementById('winner-menu-btn');
     const replayBtn = document.getElementById('winner-replay-btn');
+    
     if (menuBtn) {
-        menuBtn.onclick = () => {
+        // Remove any existing onclick to prevent conflicts
+        menuBtn.removeAttribute('onclick');
+        
+        const handleMenuClick = (e) => {
+            e.preventDefault();
+            console.log('Winner menu button clicked');
             // Hide winner overlay and show main menu
             document.getElementById('winner-message').classList.remove('show');
             showGameModeSelection();
         };
+        
+        menuBtn.addEventListener('click', handleMenuClick);
+        menuBtn.addEventListener('touchend', handleMenuClick);
     }
+    
     if (replayBtn) {
-        replayBtn.onclick = () => {
+        // Remove any existing onclick to prevent conflicts
+        replayBtn.removeAttribute('onclick');
+        
+        const handleReplayClick = (e) => {
+            e.preventDefault();
+            console.log('Winner replay button clicked');
             document.getElementById('winner-message').classList.remove('show');
             startNewGame();
         };
+        
+        replayBtn.addEventListener('click', handleReplayClick);
+        replayBtn.addEventListener('touchend', handleReplayClick);
     }
 }
 
@@ -358,8 +376,12 @@ function startNewGame() {
     hideGameModeSelection();
     document.getElementById('difficulty-selection').style.display = 'none';
     resetGame();
+    
+    // Show mobile help for first-time users
+    if (typeof MobileControls !== 'undefined' && MobileControls.isMobileDevice()) {
+        setTimeout(showMobileHelp, 1000);
+    }
 }
-
 
 // Add event listener for AI moves
 function checkAiTurn() {
@@ -371,7 +393,7 @@ function checkAiTurn() {
 // Mobile help functionality
 function showMobileHelp() {
     const mobileHelp = document.getElementById('mobile-help');
-    if (mobileHelp && MobileControls.isMobileDevice()) {
+    if (mobileHelp && typeof MobileControls !== 'undefined' && MobileControls.isMobileDevice()) {
         mobileHelp.textContent = t('mobileHelp');
         mobileHelp.classList.add('show');
         
@@ -389,18 +411,6 @@ function hideMobileHelp() {
     }
 }
 
-// Show mobile help when game starts
-function startNewGame() {
-    hideGameModeSelection();
-    document.getElementById('difficulty-selection').style.display = 'none';
-    resetGame();
-    
-    // Show mobile help for first-time users
-    if (MobileControls.isMobileDevice()) {
-        setTimeout(showMobileHelp, 1000);
-    }
-}
-
 // Setup event listeners for game mode selection
 function setupGameModeEventListeners() {
     // Wait for DOM to be ready
@@ -414,14 +424,20 @@ function setupGameModeEventListeners() {
         if (pvpBtn && pvcBtn) {
             console.log('Found PVP and PVC buttons, setting up listeners');
             
-            // Keep onclick as fallback, but also add event listeners
+            // Remove onclick attributes to prevent double execution
+            pvpBtn.removeAttribute('onclick');
+            pvcBtn.removeAttribute('onclick');
+            
+            // Add single event listeners
             pvpBtn.addEventListener('click', (e) => {
                 console.log('PVP button clicked');
+                e.preventDefault();
                 selectGameMode('pvp');
             });
             
             pvcBtn.addEventListener('click', (e) => {
                 console.log('PVC button clicked');
+                e.preventDefault();
                 selectGameMode('pvc');
             });
             
@@ -448,18 +464,26 @@ function setupGameModeEventListeners() {
             if (easyBtn && mediumBtn && hardBtn) {
                 console.log('Found difficulty buttons, setting up listeners');
                 
+                // Remove onclick attributes to prevent double execution
+                easyBtn.removeAttribute('onclick');
+                mediumBtn.removeAttribute('onclick');
+                hardBtn.removeAttribute('onclick');
+                
                 easyBtn.addEventListener('click', (e) => {
                     console.log('Easy button clicked');
+                    e.preventDefault();
                     selectDifficulty('easy');
                 });
                 
                 mediumBtn.addEventListener('click', (e) => {
                     console.log('Medium button clicked');
+                    e.preventDefault();
                     selectDifficulty('medium');
                 });
                 
                 hardBtn.addEventListener('click', (e) => {
                     console.log('Hard button clicked');
+                    e.preventDefault();
                     selectDifficulty('hard');
                 });
                 
@@ -529,7 +553,7 @@ function setupInGameMobileTouchEvents() {
     if (langBtn) {
         langBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
-            langBtn.click();
+            switchLanguage();
         });
     }
     if (menuToggle) {
@@ -538,6 +562,41 @@ function setupInGameMobileTouchEvents() {
             toggleMenu();
         });
     }
+    
+    // Menu buttons with mobile touch support
+    setupMenuButtonTouchEvents();
+}
+
+// Setup mobile touch events for menu buttons
+function setupMenuButtonTouchEvents() {
+    const menuButtons = [
+        { id: 'reset-btn', handler: showGameModeSelection },
+        { id: 'restart-btn', handler: () => { 
+            if (window.gameMode) startNewGame(); 
+        }},
+        { id: 'undo-btn', handler: undoLastMove },
+        { id: 'language-toggle', handler: switchLanguage },
+        { id: 'sound-toggle', handler: toggleSound },
+        { id: 'theme-toggle', handler: toggleTheme },
+        { id: 'fullscreen-btn', handler: toggleFullscreen }
+    ];
+    
+    menuButtons.forEach(({ id, handler }) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            // Remove onclick to prevent conflicts
+            btn.removeAttribute('onclick');
+            
+            const handleClick = (e) => {
+                e.preventDefault();
+                console.log(`${id} clicked`);
+                handler();
+            };
+            
+            btn.addEventListener('click', handleClick);
+            btn.addEventListener('touchend', handleClick);
+        }
+    });
 }
 
 if (document.readyState === 'loading') {
@@ -560,6 +619,60 @@ function toggleMenu() {
     }
 }
 
+// New menu functionality
+function undoLastMove() {
+    // TODO: Implement undo functionality
+    console.log('Undo not yet implemented');
+    // For now, just show a message
+    alert('Undo feature coming soon!');
+}
+
+function toggleSound() {
+    // TODO: Implement sound toggle
+    console.log('Sound toggle not yet implemented');
+    const btn = document.getElementById('sound-toggle');
+    if (btn) {
+        const span = btn.querySelector('span');
+        if (span.textContent === '🔊') {
+            span.textContent = '🔇';
+        } else {
+            span.textContent = '🔊';
+        }
+    }
+}
+
+function toggleTheme() {
+    // TODO: Implement theme toggle
+    console.log('Theme toggle not yet implemented');
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        const span = btn.querySelector('span');
+        if (span.textContent === '🌙') {
+            span.textContent = '☀️';
+            document.body.classList.add('light-mode');
+        } else {
+            span.textContent = '🌙';
+            document.body.classList.remove('light-mode');
+        }
+    }
+}
+
+function toggleFullscreen() {
+    try {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Fullscreen failed:', err);
+            });
+        } else {
+            document.exitFullscreen().catch(err => {
+                console.log('Exit fullscreen failed:', err);
+            });
+        }
+    } catch (err) {
+        console.log('Fullscreen not supported:', err);
+    }
+}
+
 // Export functions for global access
 window.updateUI = updateUI;
 window.updateScene = updateScene;
@@ -571,3 +684,7 @@ window.checkAiTurn = checkAiTurn;
 window.showMobileHelp = showMobileHelp;
 window.hideMobileHelp = hideMobileHelp;
 window.toggleMenu = toggleMenu;
+window.undoLastMove = undoLastMove;
+window.toggleSound = toggleSound;
+window.toggleTheme = toggleTheme;
+window.toggleFullscreen = toggleFullscreen;

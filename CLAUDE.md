@@ -5,10 +5,11 @@
 2. **NEVER** mark status as "SUCCESS" or similar without user approval  
 3. Always use "NEEDS TESTING" or "ATTEMPTED FIX" in status updates
 4. Wait for user feedback before claiming victory
-5. The user has been working on this for 2 days - respect their experience and testing
+5. The user has been working on this for long time - respect their experience and testing
+6. At the end of every action/change, explicitly document what was done and what changed (in the log, documentation, or a suitable comment)
 
 ## Original Problem Statement (USER ACCEPTED SOLUTION)
-User reported that walls were being placed with "one cube offset" - meaning the visual wall placement didn't match where the player clicked to place the wall.
+User reported that walls were being placed with "one cube offset" and after few variations it came to be 50%-100%-50% distribution across 3 cubes instead of 100%-100% across 2 cubes - meaning the visual wall placement didn't match where the player clicked to place the wall.
 
 ### Final Solution Status
 - **Root Cause**: Wall centering logic caused 50%-100%-50% distribution across 3 cubes instead of 100%-100% across 2 cubes
