@@ -24,93 +24,127 @@ window.smokeUpdaters = [];
 
 // --- Materials - Adjusted for less intense glow ---
 window.materials = {
-    board: (() => {
-        const loader = new THREE.TextureLoader();
-        const albedo = loader.load('assets/textures/damascus-steel-bl/damascus-steel_albedo.png');
-        const normal = loader.load('assets/textures/damascus-steel-bl/damascus-steel_normal-ogl.png');
-        const ao = loader.load('assets/textures/damascus-steel-bl/damascus-steel_ao.png');
-        const roughness = loader.load('assets/textures/damascus-steel-bl/damascus-steel_roughness.png');
-        const metallic = loader.load('assets/textures/damascus-steel-bl/damascus-steel_metallic.png');
-        const height = loader.load('assets/textures/damascus-steel-bl/damascus-steel_height.png');
+    board: (() => {
+        const loader = new THREE.TextureLoader();
 
-        [albedo, normal, ao, roughness, metallic, height].forEach(tex => {
-            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(2, 2);
-        });
+        const albedo = loader.load('assets/textures/stone-tile4b_bl/tile4b_basecolor.png');
+        const normal = loader.load('assets/textures/stone-tile4b_bl/tile4b_normal-ogl.png');
+        const ao = loader.load('assets/textures/stone-tile4b_bl/tile4b_ao.png');
+        const roughness = loader.load('assets/textures/stone-tile4b_bl/tile4b_roughness.png');
+        const metallic = null; // No metallic texture available
+        const height = null; // No height texture available
 
-        return new THREE.MeshPhysicalMaterial({
-            map: albedo,
-            normalMap: normal,
-            aoMap: ao,
-            roughnessMap: roughness,
-            metalnessMap: metallic,
-            displacementMap: height,
-            displacementScale: 0.2,
-            roughness: 1.0,
-            metalness: 1.0,
-            color: 0xffffff,
-            clearcoat: 0.3,
-            clearcoatRoughness: 0.1,
-            emissive: 0x0a1c2e,
-            emissiveIntensity: 0.1,
-        });
-    })(),
-    goal: new THREE.MeshPhysicalMaterial({ 
-        color: 0x4ade80, 
-        roughness: 0.1, 
-        metalness: 0.2,
-        emissive: 0x16a34a,
-        emissiveIntensity: 0.4, // Reduced glow
-        transmission: 0.1,
-        thickness: 0.5,
-        clearcoat: 0.5
-    }),
-    wall: new THREE.MeshPhysicalMaterial({ 
-        color: 0x1f2937, 
-        roughness: 0.2, 
-        metalness: 0.8,
-        emissive: 0x0f172a,
-        emissiveIntensity: 0.05,
-        clearcoat: 0.8,
-        clearcoatRoughness: 0.1
-    }),
-    wallPlaceholder: new THREE.MeshPhysicalMaterial({ 
-        color: 0x60a5fa, 
-        transparent: true, 
-        opacity: 0.5,
-        emissive: 0x3b82f6,
-        emissiveIntensity: 0.3, // Reduced glow
-        transmission: 0.2,
-        thickness: 0.3
-    }),
-    highlightMove: new THREE.MeshStandardMaterial({ 
-        color: 0x00ff88,
-        emissive: 0x00ff44,
-        emissiveIntensity: 0.5, // Reduced glow
-        roughness: 0.2,
-        metalness: 0.8
-    }),
-    highlightWall: new THREE.MeshStandardMaterial({ 
-        color: 0xaa00ff,
-        emissive: 0x6600aa,
-        emissiveIntensity: 0.5, // Reduced glow
-        transparent: true,
-        opacity: 0.8
-    }),
-    highlightFirstWall: new THREE.MeshStandardMaterial({ 
-        color: 0xff8800,
-        emissive: 0xff4400,
-        emissiveIntensity: 0.8, // Reduced glow
-        transparent: true,
-        opacity: 1.0
-    }),
-    highlightSecondWall: new THREE.MeshStandardMaterial({ 
-        color: 0x00ff88,
-        emissive: 0x00cc44,
-        emissiveIntensity: 0.4, // Reduced glow
-        transparent: true,
-        opacity: 0.8
-    }),
+        [albedo, normal, ao, roughness, metallic, height].forEach(tex => {
+            if (tex) {
+                tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+                tex.repeat.set(1,1); // Adjust for desired tile size
+            }
+        });
+
+        return new THREE.MeshPhysicalMaterial({
+            map: albedo,
+            normalMap: normal,
+            aoMap: ao,
+            roughnessMap: roughness,
+            metalnessMap: metallic,
+            displacementMap: height,
+            displacementScale: 0.2,
+            roughness: 1.0,
+            metalness: 1.0,
+            color: 0xffffff,
+            clearcoat: 0.3,
+            clearcoatRoughness: 0.1,
+            emissive: 0x0a1c2e,
+            emissiveIntensity: 0.1,
+        });
+    })(),
+    goal: (() => {
+        const loader = new THREE.TextureLoader();
+        const albedo = loader.load('assets/textures/darktiles1-bl/darktiles1_basecolor.png');
+        const normal = loader.load('assets/textures/darktiles1-bl/darktiles1_normal-ogl.png');
+        const ao = loader.load('assets/textures/darktiles1-bl/darktiles1_AO.png');
+        const roughness = loader.load('assets/textures/darktiles1-bl/darktiles1_roughness.png');
+        const metallic = loader.load('assets/textures/darktiles1-bl/darktiles1_metallic.png');
+        [albedo, normal, ao, roughness, metallic].forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(0.33, 0.33);
+        });
+        return new THREE.MeshPhysicalMaterial({
+            map: albedo,
+            normalMap: normal,
+            aoMap: ao,
+            roughnessMap: roughness,
+            metalnessMap: metallic,
+            roughness: 1.0,
+            metalness: 1.0,
+            color: 0xffffff,
+            clearcoat: 0.3,
+            clearcoatRoughness: 0.1,
+            emissive: 0x0a1c2e,
+            emissiveIntensity: 0.1,
+        });
+    })(),
+    wall: (() => {
+        const loader = new THREE.TextureLoader();
+        const albedo = loader.load('assets/textures/black-white-tile-bl/black-white-tile_albedo.png');
+        const normal = loader.load('assets/textures/black-white-tile-bl/black-white-tile_normal-ogl.png');
+        const roughness = loader.load('assets/textures/black-white-tile-bl/black-white-tile_roughness.png');
+        [albedo, normal, roughness].forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(0.33, 0.15); 
+        });
+        return new THREE.MeshPhysicalMaterial({
+            map: albedo,
+            normalMap: normal,
+            roughnessMap: roughness,
+            roughness: 1.0,
+            metalness: 0.5,
+            color: 0xffffff,
+            clearcoat: 0.7,
+            clearcoatRoughness: 0.15,
+            emissive: 0x0f172a,
+            emissiveIntensity: 0.5,
+        });
+    })(),
+    wallPlaceholder: new THREE.MeshPhysicalMaterial({ 
+        color: 0x60a5fa, 
+        transparent: true, 
+        opacity: 0.5,
+        emissive: 0x3b82f6,
+        emissiveIntensity: 0.3, // Reduced glow
+        transmission: 0.2,
+        thickness: 0.3
+    }),
+    highlightMove: new THREE.MeshStandardMaterial({ 
+        color: 0x3b82f6, // Modern blue
+        emissive: 0x60a5fa, // Soft blue glow
+        emissiveIntensity: 0.25, // Subtle glow
+        roughness: 0.15,
+        metalness: 0.7,
+        transparent: true,
+        opacity: 0.55 // Soft, semi-transparent
+    }),
+    highlightWall: new THREE.MeshStandardMaterial({ 
+        color: 0xaa00ff,
+        emissive: 0x6600aa,
+        emissiveIntensity: 0.5, // Reduced glow
+        transparent: true,
+        opacity: 0.8
+    }),
+    highlightFirstWall: new THREE.MeshStandardMaterial({ 
+        color: 0xff8800,
+        emissive: 0xff4400,
+        emissiveIntensity: 0.8, // Reduced glow
+        transparent: true,
+        opacity: 1.0
+    }),
+    highlightSecondWall: new THREE.MeshStandardMaterial({ 
+        color: 0x00ff88,
+        emissive: 0x00cc44,
+        emissiveIntensity: 0.4, // Reduced glow
+        transparent: true,
+        opacity: 0.8
+    }),
 };
 
 
@@ -687,39 +721,37 @@ function initScene3D() {
     window.scene.add(window.boardGroup, window.wallsGroup);
 
 
-    // --- Ground plane with limestone cliffs textures ---
-    const textureLoader = new THREE.TextureLoader();
-    const groundAlbedo = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_albedo.png');
-    const groundNormal = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_normal-ogl.png');
-    const groundAO = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_ao.png');
-    const groundRoughness = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_roughness.png');
-    const groundMetallic = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_metallic.png');
-    const groundHeight = textureLoader.load('assets/textures/limestone-cliffs-bl/limestone-cliffs_height.png');
+    // --- Ground plane with stylized grass textures ---
+    // --- Ground plane with bathroom tile textures ---
+    const textureLoader = new THREE.TextureLoader();
+    const groundAlbedo = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-basecolor.png');
+    const groundNormal = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-normal-ogl.png');
+    const groundAO = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-ao.png');
+    const groundRoughness = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-roughness.png');
+    const groundMetalness = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-metalness.png');
 
-    [groundAlbedo, groundNormal, groundAO, groundRoughness, groundMetallic, groundHeight].forEach(tex => {
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(8, 8);
-    });
+    [groundAlbedo, groundNormal, groundAO, groundRoughness, groundMetalness].forEach(tex => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(3, 3);
+    });
 
-    const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(100, 100, 128, 128),
-        new THREE.MeshPhysicalMaterial({
-            map: groundAlbedo,
-            normalMap: groundNormal,
-            aoMap: groundAO,
-            roughnessMap: groundRoughness,
-            metalnessMap: groundMetallic,
-            displacementMap: groundHeight,
-            displacementScale: 0.0, // Remove height effect to keep ground flat
-            roughness: 1.0,
-            metalness: 0.5,
-            color: 0xffffff,
-        })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -1; // Lower the ground further so it doesn't hide the board
-    ground.receiveShadow = true;
-    window.scene.add(ground);
+    const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(40, 40, 128, 128),
+        new THREE.MeshPhysicalMaterial({
+            map: groundAlbedo,
+            normalMap: groundNormal,
+            aoMap: groundAO,
+            roughnessMap: groundRoughness,
+            metalnessMap: groundMetalness,
+            roughness: 1.0,
+            metalness: 0.2,
+            color: 0xffffff,
+        })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1; // Lower the ground further so it doesn't hide the board
+    ground.receiveShadow = true;
+    window.scene.add(ground);
 
     const cubeSize = window.CELL_SIZE - window.CUBE_GAP;
     const cellGeo = new THREE.BoxGeometry(cubeSize, window.CUBE_HEIGHT, cubeSize);
@@ -777,10 +809,10 @@ function initScene3D() {
 // Resets game to initial state
 function resetGame() {
     window.logTimer('resetGame() called', 'GAME');
-if (window.wallsGroup) window.wallsGroup.clear();
-    resetGameState();
-    updateScene();
-    updateUI();
+    if (window.wallsGroup) window.wallsGroup.clear();
+    resetGameState();
+    updateScene();
+    updateUI();
 }
 window.resetGame = resetGame;
 
@@ -833,39 +865,8 @@ function animate() {
         window.smokeUpdaters.forEach(updater => updater(deltaTime));
     }
 
-    // Raycasting logic for hover effect
-    if (!window.gameState.winner && frameCount % 6 === 0) {
-        window.raycaster.setFromCamera(window.mouse, window.camera);
-        const intersects = window.raycaster.intersectObjects(window.boardGroup.children, true);
-        
-        let newHoveredObject = null;
-        if (intersects.length > 0) {
-            const intersected = intersects[0].object;
-            if (intersected.userData.type === 'cell') {
-                newHoveredObject = intersected;
-            }
-        }
-
-        if (window.hoveredObject !== newHoveredObject) {
-            // Restore the old hovered object to its original state
-            if (window.hoveredObject) {
-                window.hoveredObject.material.emissive.setHex(window.hoveredObject.originalEmissive);
-                window.hoveredObject.material.emissiveIntensity = window.hoveredObject.originalEmissiveIntensity;
-            }
-
-            // Apply hover effect to the new object
-            window.hoveredObject = newHoveredObject;
-            if (window.hoveredObject) {
-                window.hoveredObject.material.emissive.setHex(0x87ceeb); // Light blue hover color
-                // [MODIFIED] Very subtle emissive intensity for hover to prevent glare
-                window.hoveredObject.material.emissiveIntensity = 0.3; 
-            }
-        }
-    }
     
-    // Render the scene with the post-processing effects
     composer.render(deltaTime);
-    // ...existing code...
 }
 
 // Initializes the game
