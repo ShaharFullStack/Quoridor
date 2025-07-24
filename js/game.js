@@ -17,7 +17,7 @@ let frameCount = 0;
 let lastRenderTime = 0;
 
 let targetFPS = 60;
-let frameInterval = 1000 / targetFPS;
+let frameInterval = 2000 / targetFPS;
 
 // --- Global array to hold smoke animation updaters ---
 window.smokeUpdaters = [];
@@ -264,6 +264,58 @@ function hasPathToGoal(playerPos, targetRow, tempWalls) {
     return false;
 }
 
+// Validates wall placement with detailed feedback
+function validateWallPlacement(first, second) {
+    // Check if player has walls remaining
+    if (window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0) {
+        return { valid: false, reason: "No walls remaining" };
+    }
+    
+    const firstKey = `${first.row}-${first.col}`;
+    const secondKey = `${second.row}-${second.col}`;
+    const wallSet = first.wallType === 'horizontal' ? window.gameState.horizontalWalls : window.gameState.verticalWalls;
+    
+    // Check if wall segments already exist
+    if (wallSet.has(firstKey) || wallSet.has(secondKey)) {
+        return { valid: false, reason: "Wall already exists in this location" };
+    }
+    
+    // Check for wall crossing (perpendicular walls intersecting)
+    if (first.wallType === 'horizontal') {
+        if (window.gameState.verticalWalls.has(`${first.row}-${first.col}`)) {
+            return { valid: false, reason: "Cannot cross existing vertical wall" };
+        }
+    } else {
+        if (window.gameState.horizontalWalls.has(`${first.row}-${first.col}`)) {
+            return { valid: false, reason: "Cannot cross existing horizontal wall" };
+        }
+    }
+    
+    // Check if wall would block players' paths to goal
+    const tempH_Walls = new Set(window.gameState.horizontalWalls);
+    const tempV_Walls = new Set(window.gameState.verticalWalls);
+    if (first.wallType === 'horizontal') {
+        tempH_Walls.add(firstKey);
+        tempH_Walls.add(secondKey);
+    } else {
+        tempV_Walls.add(firstKey);
+        tempV_Walls.add(secondKey);
+    }
+    const tempWalls = { horizontal: tempH_Walls, vertical: tempV_Walls };
+    
+    const player1HasPath = hasPathToGoal(window.gameState.player1Position, 0, tempWalls);
+    const player2HasPath = hasPathToGoal(window.gameState.player2Position, 8, tempWalls);
+    
+    if (!player1HasPath) {
+        return { valid: false, reason: "Wall would block Player 1's path to goal" };
+    }
+    if (!player2HasPath) {
+        return { valid: false, reason: "Wall would block Player 2's path to goal" };
+    }
+    
+    return { valid: true, reason: null };
+}
+
 // Validates wall placement
 function isValidWallPlacement(first, second) {
     if (window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0) return false;
@@ -291,6 +343,7 @@ function isValidWallPlacement(first, second) {
     return player1HasPath && player2HasPath;
 }
 window.isValidWallPlacement = isValidWallPlacement;
+window.validateWallPlacement = validateWallPlacement;
 
 // Gets possible second wall segments
 function getPossibleSecondSegments(first) {
@@ -329,27 +382,63 @@ function handleCellClick(row, col) {
 
 // Handles wall placement click
 function handleWallClick(wallType, row, col) {
-    if (window.gameState.winner || window.gameState.gameMode !== 'wall' || window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0) return;
+    if (window.gameState.winner) {
+        showNotification("Game is already over", 'warning');
+        return;
+    }
+    
+    if (window.gameState.gameMode !== 'wall') {
+        showNotification("Switch to wall mode to place walls", 'info');
+        return;
+    }
+    
+    if (window.gameState.wallsRemaining[window.gameState.currentPlayer] <= 0) {
+        showNotification("No walls remaining", 'error');
+        return;
+    }
     if (window.gameMode === 'pvc' && window.gameState.currentPlayer === 2) return;
     const wallKey = `${row}-${col}`;
     const wallSet = wallType === 'horizontal' ? window.gameState.horizontalWalls : window.gameState.verticalWalls;
-    if (wallSet.has(wallKey)) return;
+    if (wallSet.has(wallKey)) {
+        showNotification("Wall already exists in this location", 'error');
+        return;
+    }
     let seg1, seg2;
     if (wallType === 'horizontal') {
         const adjacentKey = `${row}-${col + 1}`;
-        if (col + 1 >= window.BOARD_SIZE - 1 || wallSet.has(adjacentKey)) return;
+        if (col + 1 >= window.BOARD_SIZE - 1) {
+            showNotification("Cannot place wall at board edge", 'error');
+            return;
+        }
+        if (wallSet.has(adjacentKey)) {
+            showNotification("Wall already exists in this location", 'error');
+            return;
+        }
         seg1 = { wallType, row, col };
         seg2 = { wallType, row, col: col + 1 };
     } else {
         const adjacentKey = `${row + 1}-${col}`;
-        if (row + 1 >= window.BOARD_SIZE - 1 || wallSet.has(adjacentKey)) return;
+        if (row + 1 >= window.BOARD_SIZE - 1) {
+            showNotification("Cannot place wall at board edge", 'error');
+            return;
+        }
+        if (wallSet.has(adjacentKey)) {
+            showNotification("Wall already exists in this location", 'error');
+            return;
+        }
         seg1 = { wallType, row, col };
         seg2 = { wallType, row: row + 1, col };
     }
-    if (isValidWallPlacement(seg1, seg2)) {
+    // Use detailed validation with feedback
+    const validation = validateWallPlacement(seg1, seg2);
+    if (validation.valid) {
         placeWall(seg1, seg2);
         endTurn();
     }
+    // Add error feedback if validation fails
+    if (!validation.valid) {
+        showNotification(validation.reason, 'error');
+    }
 }
 
 // Places wall in scene
@@ -777,8 +866,10 @@ function initScene3D() {
     }
 
     const wallPlaceholderHeight = window.CUBE_HEIGHT + 0.05;
-    const hWallGeo = new THREE.PlaneGeometry(window.CELL_SIZE * 2, window.WALL_WIDTH);
-    const vWallGeo = new THREE.PlaneGeometry(window.WALL_WIDTH, window.CELL_SIZE * 2);
+    // Increased size for easier clicking - 4x larger than visual wall width
+    const clickableWallWidth = window.WALL_WIDTH * 4;
+    const hWallGeo = new THREE.PlaneGeometry(window.CELL_SIZE * 2, clickableWallWidth);
+    const vWallGeo = new THREE.PlaneGeometry(clickableWallWidth, window.CELL_SIZE * 2);
     for (let r = 0; r < window.BOARD_SIZE - 1; r++) {
         for (let c = 0; c < window.BOARD_SIZE - 1; c++) {
             const hPlane = new THREE.Mesh(hWallGeo, window.materials.wallPlaceholder);

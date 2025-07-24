@@ -752,6 +752,64 @@ function toggleFullscreen() {
     }
 }
 
+// Show notification message to user
+function showNotification(message, type = 'info', duration = 3000) {
+    const existingNotification = document.querySelector('.game-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `game-notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'error' ? '#ff4444' : type === 'warning' ? '#ff9800' : '#4CAF50'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease-out;
+        max-width: 80vw;
+        text-align: center;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(-50%) translateY(-20px)';
+        notification.style.transition = 'all 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
+
+// Add CSS animation for notification
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // Export functions for global access
 window.updateUI = updateUI;
 window.updateScene = updateScene;
@@ -767,6 +825,7 @@ window.undoLastMove = undoLastMove;
 window.toggleSound = toggleSound;
 window.toggleTheme = toggleTheme;
 window.toggleFullscreen = toggleFullscreen;
+window.showNotification = showNotification;
 
 // Script loading complete
 window.logTimer('Script js/ui.js loaded', 'SCRIPT');

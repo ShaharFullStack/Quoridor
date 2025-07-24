@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://shaharfullstack.github.io/Quoridor/sitemap.xml
+
+# Block access to config files
+Disallow: /js/
+Disallow: /*.json
+Disallow: /browserconfig.xml
+Disallow: /manifest.json
+
+# Allow crawling of game assets
+Allow: /assets/
+
+# Crawl delay
+Crawl-delay: 1
