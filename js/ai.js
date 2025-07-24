@@ -5,7 +5,6 @@ constructor(difficulty = ‘medium’) {
 this.difficulty = difficulty;
 this.player = 2; // AI is always player 2
 
-```
     // New: Track move history to avoid repetitive patterns
     this.moveHistory = [];
     this.recentPositions = [];
@@ -765,7 +764,6 @@ executeWallPlacement(seg1, seg2) {
     placeWall(seg1, seg2);
     endTurn();
 }
-```
 
 }
 
