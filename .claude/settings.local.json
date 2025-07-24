@@ -6,7 +6,8 @@
       "Bash(python3:*)",
       "Bash(sed:*)",
       "Bash(grep:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

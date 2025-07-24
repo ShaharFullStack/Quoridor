@@ -77,12 +77,12 @@
                 <span>🌐</span> <span class="btn-text">English</span>
             </button>
             
-            <!-- Character Images as Background Elements -->
+            <!-- Character 3D Models as Background Elements -->
             <div class="character-left">
-                <img src="assets/images/corn.png" alt="Player 2 Character">
+                <canvas id="character-left-canvas"></canvas>
             </div>
             <div class="character-right">
-                <img src="assets/images/smoking.png" alt="Player 1 Character">
+                <canvas id="character-right-canvas"></canvas>
             </div>
             
             <div class="start-content">
@@ -92,18 +92,18 @@
                 </div>
                 
                 <div class="start-game-modes">
-                    <button class="start-btn" onclick="selectGameMode('pvp')">
-                        <div class="btn-icon">👥</div>
-                        <div class="btn-content">
-                            <div class="btn-title" id="pvp-btn-text">Player vs Player</div>
-                            <div class="btn-subtitle" id="pvp-subtitle">Play against a friend</div>
-                        </div>
-                    </button>
                     <button class="start-btn" onclick="selectGameMode('pvc')">
                         <div class="btn-icon">🤖</div>
                         <div class="btn-content">
                             <div class="btn-title" id="pvc-btn-text">Player vs AI</div>
                             <div class="btn-subtitle" id="pvc-subtitle">Challenge the computer</div>
+                        </div>
+                    </button>
+                    <button class="start-btn" onclick="selectGameMode('pvp')">
+                        <div class="btn-icon">👥</div>
+                        <div class="btn-content">
+                            <div class="btn-title" id="pvp-btn-text">Player vs Player</div>
+                            <div class="btn-subtitle" id="pvp-subtitle">Play against a friend</div>
                         </div>
                     </button>
                 </div>

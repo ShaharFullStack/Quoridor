@@ -98,11 +98,13 @@ body {
 }
 
 body.rtl {
+    overflow: hidden;
     direction: rtl;
 }
 
 
 #game-container {
+    
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -135,7 +137,7 @@ canvas {
     /* Mobile viewport handling */
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
-    overflow-y: auto;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
     
     /* Entrance animation */
@@ -171,10 +173,10 @@ canvas {
     animation: float-right 4s ease-in-out infinite 2s;
 }
 
-.character-left img, .character-right img {
-    width: clamp(160px, 24vw, 300px);
-    height: clamp(160px, 24vw, 300px);
-    object-fit: contain;
+.character-left canvas, .character-right canvas {
+    width: clamp(480px, 72vw, 900px);
+    height: clamp(480px, 72vw, 900px);
+    border-radius: 10px;
     filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
     transition: all 0.3s ease;
 }
@@ -255,7 +257,7 @@ canvas {
         right: -15%;
     }
     
-    .character-left img, .character-right img {
+    .character-left canvas, .character-right canvas {
         width: clamp(50px, 12vw, 80px);
         height: clamp(50px, 12vw, 80px);
     }

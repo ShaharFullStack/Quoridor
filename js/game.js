@@ -67,7 +67,7 @@ window.materials = {
         const metallic = loader.load('assets/textures/darktiles1-bl/darktiles1_metallic.png');
         [albedo, normal, ao, roughness, metallic].forEach(tex => {
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(0.33, 0.33);
+            tex.repeat.set(1, 1);
         });
         return new THREE.MeshPhysicalMaterial({
             map: albedo,
@@ -814,13 +814,13 @@ function initScene3D() {
 
 
     // --- Ground plane with stylized grass textures ---
-    // --- Ground plane with bathroom tile textures ---
     const textureLoader = new THREE.TextureLoader();
-    const groundAlbedo = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-basecolor.png');
-    const groundNormal = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-normal-ogl.png');
-    const groundAO = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-ao.png');
-    const groundRoughness = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-roughness.png');
-    const groundMetalness = textureLoader.load('assets/textures/bathroomtile2-bl/bathroomtile2-metalness.png');
+    const groundAlbedo = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_albedo.png');
+    const groundNormal = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_normal-ogl.png');
+    const groundAO = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_ao.png');
+    const groundRoughness = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_roughness.png');
+    const groundMetalness = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_metallic.png');
+    const groundHeight = textureLoader.load('assets/textures/rocky-rugged-terrain-bl/rocky-rugged-terrain_1_height.png');
 
     [groundAlbedo, groundNormal, groundAO, groundRoughness, groundMetalness].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -835,13 +835,15 @@ function initScene3D() {
             aoMap: groundAO,
             roughnessMap: groundRoughness,
             metalnessMap: groundMetalness,
+            displacementMap: groundHeight,
+            displacementScale: 0.5,
             roughness: 1.0,
             metalness: 0.2,
             color: 0xffffff,
         })
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -1; // Lower the ground further so it doesn't hide the board
+    ground.position.y = -1.3; // Lower the ground further so it doesn't hide the board
     ground.receiveShadow = true;
     window.scene.add(ground);
 
