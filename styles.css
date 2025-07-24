@@ -162,18 +162,18 @@ canvas {
 }
 
 .character-left {
-    left: 2%;
+    left: 15%;
     animation: float-left 4s ease-in-out infinite;
 }
 
 .character-right {
-    right: 2%;
+    right: 15%;
     animation: float-right 4s ease-in-out infinite 2s;
 }
 
 .character-left img, .character-right img {
-    width: clamp(80px, 12vw, 150px);
-    height: clamp(80px, 12vw, 150px);
+    width: clamp(160px, 24vw, 300px);
+    height: clamp(160px, 24vw, 300px);
     object-fit: contain;
     filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
     transition: all 0.3s ease;

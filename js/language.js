@@ -270,5 +270,16 @@ function updateAllText() {
     }
 }
 
+// Set Hebrew as default immediately
+document.documentElement.lang = currentLanguage;
+document.body.classList.toggle('rtl', currentLanguage === 'he');
+
+// Immediately update text on page load, before 3D initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateAllText);
+} else {
+    updateAllText();
+}
+
 // Script loading complete
 window.logTimer('Script js/language.js loaded', 'SCRIPT');
