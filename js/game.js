@@ -16,7 +16,7 @@ let clock;
 let frameCount = 0;
 let lastRenderTime = 0;
 
-let targetFPS = 30;
+let targetFPS = 60;
 let frameInterval = 1000 / targetFPS;
 
 // --- Global array to hold smoke animation updaters ---
@@ -438,6 +438,9 @@ function createSmokeEffect() {
     };
 
     const smokeParticles = new THREE.Points(geometry, material);
+    
+    // Disable raycasting for smoke particles to prevent interference with clicks
+    smokeParticles.raycast = () => {};
 
     for (let i = 0; i < particleCount; i++) {
         // Store individual particle data (velocity, lifespan)
