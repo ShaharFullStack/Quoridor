@@ -232,9 +232,13 @@ function setupWinnerOverlayButtons() {
         
         const handleMenuClick = (e) => {
             e.preventDefault();
-            // Hide winner overlay and show main menu
-            document.getElementById('winner-message').classList.remove('show');
-            showGameModeSelection();
+            // FIXED: Only execute if winner overlay is actually visible to prevent 
+            // spurious calls during initialization
+            const winnerOverlay = document.getElementById('winner-message');
+            if (winnerOverlay && winnerOverlay.classList.contains('show')) {
+                winnerOverlay.classList.remove('show');
+                showGameModeSelection();
+            }
         };
         
         newMenuBtn.addEventListener('click', handleMenuClick);
@@ -329,12 +333,31 @@ function setGameMode(mode) {
 
 // Game mode selection functions
 function showGameModeSelection() {
+    window.logTimer('showGameModeSelection() called', 'UI');
+    window.logTimer('showGameModeSelection() DOM batch operations starting', 'FIX');
+    
+    // SIMPLIFIED: Direct DOM operations without requestAnimationFrame batching
+    // to prevent delayed execution causing button jumping
     const startScreen = document.getElementById('start-screen');
     if (startScreen) {
         startScreen.classList.remove('hidden');
-        // Remove any direct style overrides to let CSS take control
         startScreen.style.display = '';
+        
+        // Optimize button animations without triggering layout recalculation
+        const buttons = startScreen.querySelectorAll('.start-btn');
+        buttons.forEach(btn => {
+            btn.style.willChange = 'opacity, transform';
+            if (!btn.classList.contains('animation-complete')) {
+                btn.classList.add('animation-complete');
+            }
+        });
+        
+        // Clean up will-change after animations complete
+        setTimeout(() => {
+            buttons.forEach(btn => btn.style.willChange = 'auto');
+        }, 1500);
     }
+    window.logTimer('showGameModeSelection() DOM batch operations completed', 'FIX');
     
     // Hide main controls during selection
     const mainControls = document.getElementById('main-controls');
@@ -361,9 +384,9 @@ function showGameModeSelection() {
         gameModeButtons.style.display = 'block';
     }
     
-    // Reset button onclick attributes to match initial HTML state
-    const pvpBtn = document.querySelector('button[onclick*="pvp"], .start-btn:first-of-type');
-    const pvcBtn = document.querySelector('button[onclick*="pvc"], .start-btn:last-of-type');
+    // ATTEMPTED FIX: Simplified selectors to reduce DOM query complexity
+    const pvpBtn = document.querySelector('.start-btn:first-of-type');
+    const pvcBtn = document.querySelector('.start-btn:last-of-type');
     
     if (pvpBtn && !pvpBtn.getAttribute('onclick')) {
         pvpBtn.setAttribute('onclick', "selectGameMode('pvp')");
@@ -372,10 +395,10 @@ function showGameModeSelection() {
         pvcBtn.setAttribute('onclick', "selectGameMode('pvc')");
     }
     
-    // Reset difficulty buttons to initial state
-    const easyBtn = document.querySelector('button[onclick*="easy"], .difficulty-btn:nth-child(1)');
-    const mediumBtn = document.querySelector('button[onclick*="medium"], .difficulty-btn:nth-child(2)');
-    const hardBtn = document.querySelector('button[onclick*="hard"], .difficulty-btn:nth-child(3)');
+    // ATTEMPTED FIX: Simplified difficulty button selectors
+    const easyBtn = document.querySelector('.difficulty-btn:nth-child(1)');
+    const mediumBtn = document.querySelector('.difficulty-btn:nth-child(2)');
+    const hardBtn = document.querySelector('.difficulty-btn:nth-child(3)');
     
     if (easyBtn && !easyBtn.getAttribute('onclick')) {
         easyBtn.setAttribute('onclick', "selectDifficulty('easy')");
@@ -392,9 +415,10 @@ function showGameModeSelection() {
     window.aiPlayer = null;
     
     // Re-setup event listeners to ensure consistency
-    setTimeout(() => {
-        setupGameModeEventListeners();
-    }, 100);
+    // Remove the duplicate call that causes button jumping
+    // First call already handles this at script load
+    
+    window.logTimer('showGameModeSelection() DOM manipulations completed', 'FIX');
 }
 
 function hideGameModeSelection() {
@@ -410,6 +434,7 @@ function hideGameModeSelection() {
 }
 
 function selectGameMode(mode) {
+    window.logTimer(`selectGameMode(${mode}) called`, 'GAME');
     window.gameMode = mode;
     if (mode === 'pvc') {
         // Show difficulty selection in start screen
@@ -436,6 +461,7 @@ function selectDifficulty(difficulty) {
 }
 
 function startNewGame() {
+    window.logTimer('startNewGame() called', 'GAME');
     hideGameModeSelection();
     document.getElementById('difficulty-selection').style.display = 'none';
     resetGame();
@@ -573,7 +599,10 @@ function setupGameModeEventListeners() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', checkAndSetup);
     } else {
-        setTimeout(checkAndSetup, 100); // Small delay to ensure DOM is fully ready
+        setTimeout(() => {
+            window.logTimer('setupGameModeEventListeners checkAndSetup executing', 'FIX');
+            checkAndSetup();
+        }, 100); // Small delay to ensure DOM is fully ready
     }
 }
 
@@ -652,7 +681,10 @@ function setupMenuButtonTouchEvents() {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupInGameMobileTouchEvents);
 } else {
-    setTimeout(setupInGameMobileTouchEvents, 100);
+    setTimeout(() => {
+        window.logTimer('setupInGameMobileTouchEvents executing', 'FIX');
+        setupInGameMobileTouchEvents();
+    }, 100);
 }
 
 // Menu toggle functionality
@@ -735,3 +767,6 @@ window.undoLastMove = undoLastMove;
 window.toggleSound = toggleSound;
 window.toggleTheme = toggleTheme;
 window.toggleFullscreen = toggleFullscreen;
+
+// Script loading complete
+window.logTimer('Script js/ui.js loaded', 'SCRIPT');

@@ -1,3 +1,5 @@
+// Provide a no-op logTimer to prevent errors in scripts that still reference it
+window.logTimer = function(){};
 // --- SHARED GLOBALS ---
 
 // Game constants

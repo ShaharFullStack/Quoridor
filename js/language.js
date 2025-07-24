@@ -222,9 +222,16 @@ function updateAllText() {
         winnerReplayBtn.innerHTML = `🔄 ${t('playAgainBtn')}`;
     }
     
-    // Re-setup winner overlay buttons after innerHTML changes
+    // FIXED: Re-setup winner overlay buttons after innerHTML changes using requestIdleCallback
+    // to prevent layout shifts during button animations
     if (typeof setupWinnerOverlayButtons === 'function') {
-        setTimeout(setupWinnerOverlayButtons, 50);
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(() => {
+                setupWinnerOverlayButtons();
+            }, { timeout: 1000 });
+        } else {
+            setTimeout(setupWinnerOverlayButtons, 100);
+        }
     }
     
     // Update menu section headers using translation keys
@@ -262,3 +269,6 @@ function updateAllText() {
         updateUI(); // Refresh all dynamic text
     }
 }
+
+// Script loading complete
+window.logTimer('Script js/language.js loaded', 'SCRIPT');

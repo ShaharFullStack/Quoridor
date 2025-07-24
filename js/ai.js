@@ -768,3 +768,6 @@ class QuoridorAI {
 
 // Global AI instance
 window.aiPlayer = new QuoridorAI('medium');
+
+// Script loading complete
+window.logTimer('Script js/ai.js loaded', 'SCRIPT');

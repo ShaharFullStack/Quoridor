@@ -16,8 +16,7 @@ let clock;
 let frameCount = 0;
 let lastRenderTime = 0;
 
-// ATTEMPTED FIX: Reduce initial frame rate to prevent RAF violations during startup
-let targetFPS = 24; // Reduced from 30 to lower GPU/CPU load during initial animations
+let targetFPS = 30;
 let frameInterval = 1000 / targetFPS;
 
 // --- Global array to hold smoke animation updaters ---
@@ -619,15 +618,11 @@ function initScene3D() {
     const renderPass = new RenderPass(window.scene, window.camera);
     composer.addPass(renderPass);
 
-    // ATTEMPTED FIX: Reduce bloom resolution and intensity to prevent RAF violations
-    const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth * 0.5, window.innerHeight * 0.5), // Half resolution for performance
-        1.0, 0.3, 0.9
-    );
-    bloomPass.threshold = 0.6;   // Higher threshold = fewer objects glow = better performance
-    bloomPass.strength = 0.1;    // Reduced strength to minimize GPU load
-    bloomPass.radius = 0.2;      // Smaller radius for better performance
-    composer.addPass(bloomPass);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.4;   // Only very bright things will glow
+    bloomPass.strength = 0.2;    // Very subtle glow strength
+    bloomPass.radius = 0.25;     // Small radius to keep things sharp
+    composer.addPass(bloomPass);
 
     const outputPass = new OutputPass();
     composer.addPass(outputPass);
@@ -781,6 +776,7 @@ function initScene3D() {
 
 // Resets game to initial state
 function resetGame() {
+    window.logTimer('resetGame() called', 'GAME');
 if (window.wallsGroup) window.wallsGroup.clear();
     resetGameState();
     updateScene();
@@ -821,34 +817,27 @@ function onClick(event) {
 }
 
 // --- [MODIFIED] Animates the scene, including the new smoke effects ---
-
 function animate() {
     requestAnimationFrame(animate);
     const currentTime = Date.now();
-
-    const timeForThrottling = (currentTime - window.startTime) / 1000;
-    const shouldThrottle = timeForThrottling > 2.0; // Only throttle after 2 seconds
-
-
+    if (currentTime - lastRenderTime < frameInterval) return;
     lastRenderTime = currentTime;
-
 
     const deltaTime = clock.getDelta();
 
     window.controls.update();
     frameCount++;
 
-    // Only update smoke effects every 3rd frame
-    if(window.smokeUpdaters && window.smokeUpdaters.length > 0 && frameCount % 3 === 0) {
+    // --- [NEW] Update smoke effects each frame ---
+    if(window.smokeUpdaters && window.smokeUpdaters.length > 0) {
         window.smokeUpdaters.forEach(updater => updater(deltaTime));
     }
 
-    // Raycasting
-    const timeSinceStart = (Date.now() - window.PERFORMANCE_START) / 1000;
-    if (!window.gameState.winner && frameCount % 12 === 0 && timeSinceStart > 2.0) {
+    // Raycasting logic for hover effect
+    if (!window.gameState.winner && frameCount % 6 === 0) {
         window.raycaster.setFromCamera(window.mouse, window.camera);
         const intersects = window.raycaster.intersectObjects(window.boardGroup.children, true);
-
+        
         let newHoveredObject = null;
         if (intersects.length > 0) {
             const intersected = intersects[0].object;
@@ -858,52 +847,52 @@ function animate() {
         }
 
         if (window.hoveredObject !== newHoveredObject) {
+            // Restore the old hovered object to its original state
             if (window.hoveredObject) {
                 window.hoveredObject.material.emissive.setHex(window.hoveredObject.originalEmissive);
                 window.hoveredObject.material.emissiveIntensity = window.hoveredObject.originalEmissiveIntensity;
             }
+
+            // Apply hover effect to the new object
             window.hoveredObject = newHoveredObject;
             if (window.hoveredObject) {
-                window.hoveredObject.material.emissive.setHex(0x87ceeb);
-                window.hoveredObject.material.emissiveIntensity = 0.3;
+                window.hoveredObject.material.emissive.setHex(0x87ceeb); // Light blue hover color
+                // [MODIFIED] Very subtle emissive intensity for hover to prevent glare
+                window.hoveredObject.material.emissiveIntensity = 0.3; 
             }
         }
     }
-
+    
+    // Render the scene with the post-processing effects
     composer.render(deltaTime);
     // ...existing code...
 }
 
 // Initializes the game
 async function initGame() {
-    window.startTime = Date.now();
-    initScene3D();
-    await loadPawns();
-    window.boardGroup.add(window.pawns[1], window.pawns[2]);
-    showGameModeSelection();
-    window.renderer.compile(window.scene, window.camera);
-    animate();
-    window.addEventListener('resize', onWindowResize);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('click', onClick);
-    document.getElementById('move-btn').addEventListener('click', () => setGameMode('move'));
-    document.getElementById('wall-btn').addEventListener('click', () => setGameMode('wall'));
-    document.getElementById('reset-btn').addEventListener('click', showGameModeSelection);
-    document.getElementById('language-toggle').addEventListener('click', switchLanguage);
-    setTimeout(() => {
-        if (window.requestIdleCallback) {
-            window.requestIdleCallback(() => {
-                updateAllText();
-            }, { timeout: 2000 });
-        } else {
-            setTimeout(() => {
-                updateAllText();
-            }, 16);
-        }
-    }, 1200);
+    window.logTimer('initGame() called', 'INIT');
+    
+    window.logTimer('Starting 3D scene initialization', 'INIT');
+    initScene3D();
+    await loadPawns();
+    window.boardGroup.add(window.pawns[1], window.pawns[2]);
+    showGameModeSelection();
+    animate();
+    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('click', onClick);
+    document.getElementById('move-btn').addEventListener('click', () => setGameMode('move'));
+    document.getElementById('wall-btn').addEventListener('click', () => setGameMode('wall'));
+    document.getElementById('reset-btn').addEventListener('click', showGameModeSelection);
+    document.getElementById('language-toggle').addEventListener('click', switchLanguage);
+    updateAllText();
 }
 
 // Start the game when the script loads
-initGame();
+window.logTimer('Script js/game.js loaded', 'SCRIPT');
 
+if (!initGame()) {
+    initGame()
+}
 
+    

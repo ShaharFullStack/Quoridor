@@ -433,3 +433,6 @@ if (document.readyState === 'loading') {
 
 // Export for global access
 window.MobileControls = MobileControls;
+
+// Script loading complete
+window.logTimer('Script js/mobile.js loaded', 'SCRIPT');
