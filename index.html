@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -67,14 +67,14 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="rtl">
 
     <div id="game-container">
         <canvas id="c"></canvas>
         <!-- Starting Screen Overlay -->
         <div id="start-screen" class="start-screen">
             <button id="start-language-toggle" class="start-lang-toggle" onclick="switchLanguage()">
-                <span>🌐</span> <span class="btn-text">עברית</span>
+                <span>🌐</span> <span class="btn-text">English</span>
             </button>
             
             <!-- Character Images as Background Elements -->
@@ -112,21 +112,21 @@
                     <h3 id="difficulty-title">Choose AI Difficulty</h3>
                     <div class="difficulty-options">
                         <button class="difficulty-btn" onclick="selectDifficulty('easy')">
-                            <span>😊</span>
+                            <span>😎</span>
                             <div>
                                 <div class="diff-title" id="easy-btn-text">Easy</div>
                                 <div class="diff-desc" id="easy-desc">Relaxed gameplay</div>
                             </div>
                         </button>
                         <button class="difficulty-btn" onclick="selectDifficulty('medium')">
-                            <span>🤔</span>
+                            <span>🥵</span>
                             <div>
                                 <div class="diff-title" id="medium-btn-text">Medium</div>
                                 <div class="diff-desc" id="medium-desc">Balanced challenge</div>
                             </div>
                         </button>
                         <button class="difficulty-btn" onclick="selectDifficulty('hard')">
-                            <span>😤</span>
+                            <span>🤬</span>
                             <div>
                                 <div class="diff-title" id="hard-btn-text">Hard</div>
                                 <div class="diff-desc" id="hard-desc">Expert level</div>
@@ -142,15 +142,15 @@
         <div id="main-controls" class="main-controls">
             <button id="move-btn" class="action-btn active">
                 <span>🚶</span>
-                <span class="btn-label">Move</span>
+                <span class="btn-label" id="move-btn-label">Move</span>
             </button>
             <button id="wall-btn" class="action-btn">
                 <span>🧱</span>
-                <span class="btn-label">Wall</span>
+                <span class="btn-label" id="wall-btn-label">Wall</span>
             </button>
             <button id="main-language-toggle" class="action-btn" onclick="switchLanguage()">
                 <span>🌐</span>
-                <span class="btn-label">עברית</span>
+                <span class="btn-label">English</span>
             </button>
         </div>
 

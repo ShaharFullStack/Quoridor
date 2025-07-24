@@ -815,7 +815,7 @@ canvas {
 }
 
 .menu-toggle {
-    position: absolute;
+    position: fixed;
     top: 10px;
     left: 10px;
     width: 40px;
@@ -831,6 +831,14 @@ canvas {
     font-size: 18px;
     transition: all 0.3s ease;
     z-index: 1001;
+    /* Ensure consistent positioning regardless of text direction */
+    direction: ltr;
+}
+
+/* Override RTL behavior for menu toggle to keep it in consistent position */
+body.rtl .menu-toggle {
+    left: 10px;
+    right: auto;
 }
 
 .menu-toggle:hover {

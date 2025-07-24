@@ -650,6 +650,79 @@ const timeSinceStart = (Date.now() - window.PERFORMANCE_START) / 1000; // Line 8
 
 **Status**: ✅ SYNTAX ERROR FIXED - GAME SHOULD START NORMALLY
 
+### Phase 6: Wall Placement UX & Visual Improvements
+
+#### Request 6A: Smoke Click-Through Issue
+**User Report**: "the smoke of the characters is disturbing the touch and click, this should be ignored in the game, the smoke is just for a better look"
+**Implementation**: 
+- Added `smokeParticles.raycast = () => {};` to disable raycasting on smoke particle systems
+- Smoke particles now act as pure visual effects without interfering with game interactions
+- **Files Modified**: `js/game.js` (line 177)
+- **Status**: ✅ COMPLETED - Smoke no longer blocks clicks
+
+#### Request 6B: Wall Placement UX Enhancement  
+**User Request**: "it is not easy to place the walls, the selection area is pretty small and you need to add some messages when placement is invalid and from what reason"
+**Implementation**:
+- **Larger Click Areas**: Increased wall placeholder mesh size from `WALL_WIDTH` (0.2) to `WALL_WIDTH * 4` (0.8) for 4x easier targeting
+- **Comprehensive Validation Messages**: Added detailed error feedback system
+  - Error types: "No walls remaining", "Wall already exists", "Cannot cross existing wall", "Wall would block player path", "Cannot place at board edge"
+  - Color-coded notifications: Red (errors), Orange (warnings), Blue (info)
+  - Smooth notification animations with auto-dismissal
+- **Files Modified**: 
+  - `js/game.js` (lines 515-517, 267-346, 384-455): Larger placeholders and detailed validation
+  - `js/ui.js` (lines 755-828): Notification system
+- **Status**: ✅ COMPLETED - Wall placement much more user-friendly
+
+#### Request 6C: Complete Start Screen Redesign
+**User Report**: "it looks very bad and is overflows on x, can you redesign the entire page"
+**Problem**: Character images in header caused horizontal overflow and cramped layout
+**Solution**: Complete architectural redesign
+- **Background Character Layout**: Characters positioned as absolute background elements instead of inline
+- **No Overflow**: Characters positioned outside main content flow (left: 2%, right: 2%)
+- **Responsive Design**: 
+  - Desktop: Full character visibility with floating animations
+  - Tablet: Reduced opacity (0.3), pushed off-screen (-15%)  
+  - Mobile: Characters completely hidden to avoid interference
+- **Enhanced Animations**: 4-second floating cycles with rotation and opacity changes
+- **Mobile Optimization**: 
+  - Full viewport usage, optimized typography scaling
+  - Touch-friendly button sizes, vertical difficulty layout
+  - Clean content-focused experience without character interference
+- **Files Modified**:
+  - `index.html` (lines 80-86): Restructured character positioning
+  - `styles.css` (lines 154-369): Complete redesign with responsive breakpoints
+- **Status**: ✅ COMPLETED - Clean, responsive design without overflow
+
+#### Request 6D: Meta Tags & PWA Enhancement
+**User Request**: "add metas in index.html" and "i added assets/icons"
+**Implementation**:
+- **Comprehensive Meta Tags**: SEO, Open Graph, Twitter Cards, PWA manifest
+- **Progressive Web App Files**: 
+  - `manifest.json`: Complete PWA configuration with shortcuts and screenshots
+  - `browserconfig.xml`: Microsoft tile configurations  
+  - `robots.txt`: SEO-friendly crawler instructions
+  - `sitemap.xml`: Search engine optimization
+- **Enhanced Favicon Support**: SVG favicon priority with fallback sizes (48px, 32px, 16px)  
+- **Files Created**: `manifest.json`, `browserconfig.xml`, `robots.txt`, `sitemap.xml`
+- **Files Modified**: `index.html` (lines 7-61): Complete meta enhancement
+- **Status**: ✅ COMPLETED - Full PWA ready with app-like functionality
+
+#### Request 6E: 3D Board Positioning Adjustment
+**User Request**: "the board could be lower abit"
+**Implementation**: 
+- **Proper Board Lowering**: Lowered all game elements by 1 unit instead of moving camera
+- **Comprehensive Updates**:
+  - Board cubes: `Y = CUBE_HEIGHT/2 - 1`
+  - Wall placeholders: `Y = CUBE_HEIGHT + 0.05 - 1`
+  - Actual walls: `Y = wallHeight/2 - 1` 
+  - Player pawns: `Y = CUBE_HEIGHT + 1.5 - 1`
+  - Animation system: Updated height calculations in movement animations
+- **Camera Maintained**: Original camera position/target preserved for consistent perspective
+- **Files Modified**:
+  - `js/game.js` (lines 855, 868, 667, 674, 613, 637): Board element positioning
+  - `js/ui.js` (lines 37, 67, 77): Animation system heights
+- **Status**: ✅ COMPLETED - Board positioned lower with all elements properly aligned
+
 ## Technical Architecture
 
 ### Animation System
@@ -736,6 +809,11 @@ function updateAllText() {
 ✅ Missing translations: COMPLETED (full coverage added)
 ✅ Language switching issues: COMPLETED - USER VERIFIED
 ✅ Performance logging: COMPLETED (comprehensive timer system added)
+✅ Smoke click interference: COMPLETED (raycasting disabled for particles)
+✅ Wall placement UX: COMPLETED (4x larger click areas + detailed validation messages)
+✅ Start screen redesign: COMPLETED (responsive background character layout)
+✅ Meta tags & PWA: COMPLETED (comprehensive SEO, social media, and PWA support)
+✅ 3D board positioning: COMPLETED (board lowered by 1 unit, all elements aligned)
 🔧 Menu button jumping: FINAL COMPREHENSIVE ATTEMPTED FIX - 4-stage solution implemented:
    - Stage 1: Deferred updateAllText() (moved from 1.472s)
    - Stage 2: Removed DOM style manipulations during animationend (eliminated 2.074s jumping)  

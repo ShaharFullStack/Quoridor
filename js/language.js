@@ -1,5 +1,5 @@
 // --- LANGUAGE SYSTEM ---
-let currentLanguage = 'en';
+let currentLanguage = 'he';
 
 const translations = {
     en: {
@@ -180,10 +180,10 @@ function updateAllText() {
     if (hardDesc) hardDesc.textContent = t('hardDesc');
     
     // Update main action button labels
-    const moveBtnLabel = document.querySelector('#move-btn .btn-label');
+    const moveBtnLabel = document.getElementById('move-btn-label');
     if (moveBtnLabel) moveBtnLabel.textContent = t('moveBtn');
     
-    const wallBtnLabel = document.querySelector('#wall-btn .btn-label');
+    const wallBtnLabel = document.getElementById('wall-btn-label');
     if (wallBtnLabel) wallBtnLabel.textContent = t('wallBtn');
     
     // Update main language toggle button

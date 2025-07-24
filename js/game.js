@@ -610,7 +610,7 @@ async function loadPawns() {
     // --- Pawn 1 (Smoking) ---
     const smokingModel = smokingGltf.scene;
     smokingModel.scale.set(3, 3, 3);
-    smokingModel.position.y = window.CUBE_HEIGHT + 1.5;
+    smokingModel.position.y = window.CUBE_HEIGHT + 1.5 - 1;
     smokingModel.rotation.y = Math.PI - Math.PI/4;
     smokingModel.traverse(child => {
         if (child.isMesh) {
@@ -634,7 +634,7 @@ async function loadPawns() {
     // --- Pawn 2 (Corn) ---
     const cornModel = cornGltf.scene;
     cornModel.scale.set(3, 3, 3);
-    cornModel.position.y = window.CUBE_HEIGHT + 1.5;
+    cornModel.position.y = window.CUBE_HEIGHT + 1.5 - 1;
     cornModel.rotation.y = -5*Math.PI/12;
     cornModel.traverse(child => {
         if (child.isMesh) {
@@ -664,14 +664,14 @@ function addWallMesh(wallType, row, col) {
         geometry = new THREE.BoxGeometry(window.CELL_SIZE * 2, wallHeight, wallThickness);
         position = {
             x: window.BOARD_OFFSET + col * window.CELL_SIZE + window.CELL_SIZE/2,
-            y: wallHeight / 2,
+            y: wallHeight / 2 - 1,
             z: window.BOARD_OFFSET + row * window.CELL_SIZE + window.CELL_SIZE/2
         };
     } else {
         geometry = new THREE.BoxGeometry(wallThickness, wallHeight, window.CELL_SIZE * 2);
         position = {
             x: window.BOARD_OFFSET + col * window.CELL_SIZE + window.CELL_SIZE/2,
-            y: wallHeight / 2,
+            y: wallHeight / 2 - 1,
             z: window.BOARD_OFFSET + row * window.CELL_SIZE + window.CELL_SIZE/2
         };
     }
@@ -852,7 +852,7 @@ function initScene3D() {
             const isGoalRow = row === 0 || row === 8;
             const cell = new THREE.Mesh(cellGeo, isGoalRow ? window.materials.goal : window.materials.board);
             const coords = posToCoords({row, col});
-            cell.position.set(coords.x, window.CUBE_HEIGHT / 2, coords.z);
+            cell.position.set(coords.x, window.CUBE_HEIGHT / 2 - 1, coords.z);
             cell.castShadow = true;
             cell.receiveShadow = true;
             cell.userData = { type: 'cell', row, col };
@@ -865,7 +865,7 @@ function initScene3D() {
         }
     }
 
-    const wallPlaceholderHeight = window.CUBE_HEIGHT + 0.05;
+    const wallPlaceholderHeight = window.CUBE_HEIGHT + 0.05 - 1;
     // Increased size for easier clicking - 4x larger than visual wall width
     const clickableWallWidth = window.WALL_WIDTH * 4;
     const hWallGeo = new THREE.PlaneGeometry(window.CELL_SIZE * 2, clickableWallWidth);

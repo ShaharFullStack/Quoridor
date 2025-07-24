@@ -34,7 +34,7 @@ function animatePlayerMovement(playerNum, fromPos, toPos, callback) {
         
         // Add slight arc to the movement (jump effect)
         const arcHeight = Math.sin(anim.progress * Math.PI) * 0.8;
-        const playerHeight = CUBE_HEIGHT + 1.5 + arcHeight;
+        const playerHeight = CUBE_HEIGHT + 1.5 - 1 + arcHeight;
         
         // Update pawn position
         if (window.pawns[playerNum]) {
@@ -64,7 +64,7 @@ function updateScene() {
     // Only update positions if not animating
     if(window.pawns[1] && !window.playerAnimations.player1.isAnimating) {
         const pos1 = posToCoords(gameState.player1Position);
-        const playerHeight = CUBE_HEIGHT + 1.5;
+        const playerHeight = CUBE_HEIGHT + 1.5 - 1;
         window.pawns[1].position.set(pos1.x, playerHeight, pos1.z);
         // Update player 1 spotlight position
         if(window.playerSpotlights[1]) {
@@ -74,7 +74,7 @@ function updateScene() {
     }
     if(window.pawns[2] && !window.playerAnimations.player2.isAnimating) {
         const pos2 = posToCoords(gameState.player2Position);
-        const playerHeight = CUBE_HEIGHT + 1.5;
+        const playerHeight = CUBE_HEIGHT + 1.5 - 1;
         window.pawns[2].position.set(pos2.x, playerHeight, pos2.z);
         // Update player 2 spotlight position
         if(window.playerSpotlights[2]) {
@@ -430,6 +430,8 @@ function hideGameModeSelection() {
     const mainControls = document.getElementById('main-controls');
     if (mainControls) {
         mainControls.style.display = 'flex';
+        // Update text translations after main controls become visible
+        updateAllText();
     }
 }
 
