@@ -228,7 +228,6 @@ function setupWinnerOverlayButtons() {
         
         const handleMenuClick = (e) => {
             e.preventDefault();
-            console.log('Winner menu button clicked');
             // Hide winner overlay and show main menu
             document.getElementById('winner-message').classList.remove('show');
             showGameModeSelection();
@@ -244,7 +243,6 @@ function setupWinnerOverlayButtons() {
         
         const handleReplayClick = (e) => {
             e.preventDefault();
-            console.log('Winner replay button clicked');
             document.getElementById('winner-message').classList.remove('show');
             startNewGame();
         };
@@ -326,12 +324,38 @@ function showGameModeSelection() {
     const startScreen = document.getElementById('start-screen');
     if (startScreen) {
         startScreen.classList.remove('hidden');
+        // Remove any direct style overrides to let CSS take control
+        startScreen.style.display = '';
     }
+    
     // Hide main controls during selection
     const mainControls = document.getElementById('main-controls');
     if (mainControls) {
         mainControls.style.display = 'none';
     }
+    
+    // Hide game menu if open
+    const gameMenu = document.getElementById('game-menu');
+    if (gameMenu) {
+        gameMenu.classList.add('collapsed');
+        const menuIcon = document.querySelector('.menu-icon');
+        if (menuIcon) menuIcon.textContent = '☰';
+    }
+    
+    // Reset difficulty selection and game mode buttons
+    const difficultySelection = document.getElementById('difficulty-selection');
+    if (difficultySelection) {
+        difficultySelection.style.display = 'none';
+    }
+    
+    const gameModeButtons = document.querySelector('.start-game-modes');
+    if (gameModeButtons) {
+        gameModeButtons.style.display = 'block';
+    }
+    
+    // Clear any previous game mode
+    window.gameMode = null;
+    window.aiPlayer = null;
 }
 
 function hideGameModeSelection() {
@@ -415,14 +439,11 @@ function hideMobileHelp() {
 function setupGameModeEventListeners() {
     // Wait for DOM to be ready
     const checkAndSetup = () => {
-        console.log('Setting up game mode event listeners...');
-        
         // Use more specific selectors and add both click and touch events
         const pvpBtn = document.querySelector('button[onclick*="pvp"]');
         const pvcBtn = document.querySelector('button[onclick*="pvc"]');
         
         if (pvpBtn && pvcBtn) {
-            console.log('Found PVP and PVC buttons, setting up listeners');
             
             // Remove onclick attributes to prevent double execution
             pvpBtn.removeAttribute('onclick');
@@ -430,26 +451,22 @@ function setupGameModeEventListeners() {
             
             // Add single event listeners
             pvpBtn.addEventListener('click', (e) => {
-                console.log('PVP button clicked');
                 e.preventDefault();
                 selectGameMode('pvp');
             });
             
             pvcBtn.addEventListener('click', (e) => {
-                console.log('PVC button clicked');
                 e.preventDefault();
                 selectGameMode('pvc');
             });
             
             // Also add touch events for mobile
             pvpBtn.addEventListener('touchend', (e) => {
-                console.log('PVP button touched');
                 e.preventDefault();
                 selectGameMode('pvp');
             });
             
             pvcBtn.addEventListener('touchend', (e) => {
-                console.log('PVC button touched');
                 e.preventDefault();
                 selectGameMode('pvc');
             });
@@ -462,27 +479,22 @@ function setupGameModeEventListeners() {
             const hardBtn = document.querySelector('button[onclick*="hard"]');
             
             if (easyBtn && mediumBtn && hardBtn) {
-                console.log('Found difficulty buttons, setting up listeners');
-                
                 // Remove onclick attributes to prevent double execution
                 easyBtn.removeAttribute('onclick');
                 mediumBtn.removeAttribute('onclick');
                 hardBtn.removeAttribute('onclick');
                 
                 easyBtn.addEventListener('click', (e) => {
-                    console.log('Easy button clicked');
                     e.preventDefault();
                     selectDifficulty('easy');
                 });
                 
                 mediumBtn.addEventListener('click', (e) => {
-                    console.log('Medium button clicked');
                     e.preventDefault();
                     selectDifficulty('medium');
                 });
                 
                 hardBtn.addEventListener('click', (e) => {
-                    console.log('Hard button clicked');
                     e.preventDefault();
                     selectDifficulty('hard');
                 });
@@ -589,7 +601,6 @@ function setupMenuButtonTouchEvents() {
             
             const handleClick = (e) => {
                 e.preventDefault();
-                console.log(`${id} clicked`);
                 handler();
             };
             
@@ -622,14 +633,12 @@ function toggleMenu() {
 // New menu functionality
 function undoLastMove() {
     // TODO: Implement undo functionality
-    console.log('Undo not yet implemented');
     // For now, just show a message
     alert('Undo feature coming soon!');
 }
 
 function toggleSound() {
     // TODO: Implement sound toggle
-    console.log('Sound toggle not yet implemented');
     const btn = document.getElementById('sound-toggle');
     if (btn) {
         const span = btn.querySelector('span');
@@ -643,7 +652,6 @@ function toggleSound() {
 
 function toggleTheme() {
     // TODO: Implement theme toggle
-    console.log('Theme toggle not yet implemented');
     const btn = document.getElementById('theme-toggle');
     if (btn) {
         const span = btn.querySelector('span');
@@ -661,15 +669,15 @@ function toggleFullscreen() {
     try {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                console.log('Fullscreen failed:', err);
+                // Fullscreen request failed silently
             });
         } else {
             document.exitFullscreen().catch(err => {
-                console.log('Exit fullscreen failed:', err);
+                // Exit fullscreen failed silently
             });
         }
     } catch (err) {
-        console.log('Fullscreen not supported:', err);
+        // Fullscreen not supported
     }
 }
 
