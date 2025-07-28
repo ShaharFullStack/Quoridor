@@ -385,8 +385,8 @@ function showGameModeSelection() {
     }
     
     // ATTEMPTED FIX: Simplified selectors to reduce DOM query complexity
-    const pvpBtn = document.querySelector('.start-btn:first-of-type');
-    const pvcBtn = document.querySelector('.start-btn:last-of-type');
+    const pvcBtn = document.querySelector('.start-btn:first-of-type');
+    const pvpBtn = document.querySelector('.start-btn:last-of-type');
     
     if (pvpBtn && !pvpBtn.getAttribute('onclick')) {
         pvpBtn.setAttribute('onclick', "selectGameMode('pvp')");
